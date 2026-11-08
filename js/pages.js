@@ -577,6 +577,7 @@ export function pagePhoto(ctx) {
 const T_FIELDS = [
   { k: "name", label: "이름", req: true },
   { k: "role", label: "담당 (예: 1반 담임)" },
+  { k: "subject", label: "담당 과목 (예: 수학)" },
   { k: "nick", label: "파워퍼프걸 별명 (예: 블로섬 쌤)" },
   { k: "intro", label: "소개", type: "textarea", rows: 5 }
 ];
