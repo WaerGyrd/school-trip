@@ -441,7 +441,6 @@ export function pageQuiz(ctx) {
           <input id="qname" maxlength="12" placeholder="이름" style="padding:9px;border-radius:10px;border:1px solid #ddd;width:140px">
         </div>
         <div style="margin-top:10px"><button class="btn primary" data-act="saveScore">랭킹 등록</button></div>`}
-      <div style="margin-top:10px"><button class="btn ghost" data-act="start">다시 풀기</button></div>
     </div>`;
   };
   const drawQ = () => { const el = $("#qarea"); if (el) el.innerHTML = qHtml(); };
