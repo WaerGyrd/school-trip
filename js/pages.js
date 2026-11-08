@@ -591,6 +591,7 @@ export function pageTeachers(ctx) {
       <div class="tcard c${i % 3}">
         <h3>${esc(t.name)}</h3>
         <div class="nick">${esc([t.role, t.nick].filter(Boolean).join(" · "))}</div>
+        ${t.subject ? `<div class="nick">📖 ${esc(t.subject)}</div>` : ""}
         <p>${t.intro ? esc(t.intro) : "소개를 준비 중이에요 ✨"}</p>
         ${pen("editT", `data-i="${i}"`)}
       </div>`).join("")}</div>
