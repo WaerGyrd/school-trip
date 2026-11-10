@@ -17,8 +17,8 @@ test("teacher picks who the notice is from", async () => {
   const { page, close } = await openPage({ hash: "#/notice", fake: { teacher: DEV } });
   await page.click('#view [data-act="newN"]');
   const names = await page.$$eval('#mf [name="signedAs"] option', o => o.map(x => x.value));
-  assert.equal(names[0], "조수민");
-  assert.ok(names.includes("배일환"));
+  assert.deepEqual(names, ["김영한", "배일환", "조지용", "이수선", "이재이", "한현", "김영훈"]);
+  assert.equal(await page.inputValue('#mf [name="signedAs"]'), "김영한", "developer name is never used");
   await page.selectOption('#mf [name="signedAs"]', "배일환");
   await page.selectOption('#mf [name="cls"]', "2");
   await page.fill('#mf [name="title"]', "제목"); await page.fill('#mf [name="body"]', "내용");

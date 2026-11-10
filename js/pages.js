@@ -1,8 +1,8 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261110c";
-import { DEFAULTS, CITY_INTRO } from "./data.js?v=20261110c";
-import * as S from "./store.js?v=20261110c";
-import { icon } from "./icons.js?v=20261110c";
-import { pickRound } from "./quiz.js?v=20261110c";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261110d";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS } from "./data.js?v=20261110d";
+import * as S from "./store.js?v=20261110d";
+import { icon } from "./icons.js?v=20261110d";
+import { pickRound } from "./quiz.js?v=20261110d";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -293,8 +293,9 @@ function noticeForm(n) {
   const t = S.state.teacher;
   // 선생님이면 누구나 공통·모든 반에 쓸 수 있음
   const opts = [["0", "공통 (전체)"], ...CLASSES.map(c => [String(c), c + "반"])];
-  // 작성자 표시: 로그인한 계정 이름이 기본, 10학년부 선생님 중에서 고를 수 있음
-  const names = [...new Set([t.name, ...S.get("teachers").map(x => x.name)].filter(Boolean))];
+  // 작성자: 10학년부 선생님 7명 중에서 고름 (로그인한 선생님이 목록에 있으면 그 이름이 기본)
+  const names = NOTICE_AUTHORS;
+  const me = names.includes(t.name) ? t.name : names[0];
   openForm({
     title: n ? "공지 수정" : "새 공지",
     fields: [
@@ -305,8 +306,8 @@ function noticeForm(n) {
       { k: "pinned", label: "맨 위에 고정 (긴급 연락처 등)", type: "check" }
     ],
     values: n
-      ? { cls: String(n.cls), signedAs: n.signedAs || n.authorName || t.name, title: n.title, body: n.body, pinned: !!n.pinned }
-      : { cls: String(t.classNo >= 1 ? t.classNo : 0), signedAs: t.name },
+      ? { cls: String(n.cls), signedAs: names.includes(n.signedAs) ? n.signedAs : me, title: n.title, body: n.body, pinned: !!n.pinned }
+      : { cls: String(t.classNo >= 1 ? t.classNo : 0), signedAs: me },
     onSave: async v => {
       try {
         const data = { cls: Number(v.cls), signedAs: v.signedAs, title: v.title, body: v.body, pinned: !!v.pinned };
