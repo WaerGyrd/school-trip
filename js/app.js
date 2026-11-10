@@ -76,6 +76,8 @@ $("#menuBtn").onclick = () => document.body.classList.toggle("menu-open");
 $("#scrim").onclick = () => document.body.classList.remove("menu-open");
 $("#drawer").addEventListener("click", e => { if (e.target.closest("a")) document.body.classList.remove("menu-open"); });
 window.addEventListener("hashchange", () => render(true));
+// 휴대폰 ↔ 노트북 폭을 넘나들면 배치가 다른 화면만 다시 그림 (리스너는 여기 하나만)
+window.matchMedia("(min-width: 900px)").addEventListener("change", () => { if (cur === "route" || cur === "learn") render(false); });
 
 /* ---------- 메뉴 아래쪽 (내 반 · 알림 설정 · 로그인) ---------- */
 function drawerExtra() {

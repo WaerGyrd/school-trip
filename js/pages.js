@@ -23,7 +23,7 @@ function page(ctx, html, acts = {}) {
   bind(ctx, acts);
 }
 async function save(id, val) {
-  try { await S.saveContent(id, val); toast("저장했어요 ✅", 2000); return true; }
+  try { await S.saveContent(id, val); toast("저장했어요", 2000); return true; }
   catch (e) { alert("저장하지 못했어요.\n" + (e.message || e)); return false; }
 }
 const mut = (id, fn) => { const a = clone(S.get(id)); fn(a); return save(id, a); };
@@ -52,6 +52,8 @@ export function padletLink() {
   const v = (S.state.content.settings || {}).padlet;
   return v !== undefined ? v : DEFAULTS.settings.padlet;
 }
+// 선생님이 입력한 링크는 http(s) 주소일 때만 링크로 씀 (javascript: 같은 주소 차단)
+const safeUrl = u => /^https?:\/\//i.test(String(u || "").trim()) ? String(u).trim() : "";
 const settingsForSave = () => ({ ...S.settings(), padlet: padletLink() });
 
 /* ---------- 메인 ---------- */
@@ -199,11 +201,13 @@ function scheduleDay(ctx, days, di) {
 }
 
 /* ---------- 이동 경로 ---------- */
+const mapFrame = r => r.fromQ && r.toQ
+  ? `<iframe class="map" loading="lazy" title="지도" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?saddr=${enc(r.fromQ)}&amp;daddr=${enc(r.toQ)}&amp;output=embed"></iframe>`
+  : '<div class="mute">지도가 아직 없어요.</div>';
+// 지도 이미지가 있으면 이미지, 이미지 파일이 없으면 구글맵으로 대신
 const mapHtml = r => r.img
-  ? `<img class="map" src="${esc(r.img)}" alt="지도" loading="lazy">`
-  : (r.fromQ && r.toQ
-    ? `<iframe class="map" loading="lazy" title="지도" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?saddr=${enc(r.fromQ)}&amp;daddr=${enc(r.toQ)}&amp;output=embed"></iframe>`
-    : '<div class="mute">지도가 아직 없어요.</div>');
+  ? `<img class="map" src="${esc(r.img)}" alt="지도" loading="lazy" data-fb="${esc(mapFrame(r))}" onerror="this.outerHTML=this.dataset.fb">`
+  : mapFrame(r);
 const dirUrl = r => `https://www.google.com/maps/dir/?api=1&amp;origin=${enc(r.fromQ || "")}&amp;destination=${enc(r.toQ || "")}&amp;travelmode=driving`;
 const isLap = () => window.matchMedia("(min-width: 900px)").matches;
 // "A팀 · 전쟁 박물관 → 역사 박물관" → { team: "A팀", name: "전쟁 박물관 → 역사 박물관" }
@@ -286,11 +290,6 @@ export function pageRoute(ctx) {
     down: d => move(Number(d.i), 1)
   });
 
-  // 휴대폰 ↔ 노트북 폭이 바뀌면 다시 그림
-  const mq = window.matchMedia("(min-width: 900px)");
-  const re = () => pageRoute(ctx);
-  mq.addEventListener("change", re);
-  ctx.leave(() => mq.removeEventListener("change", re));
 }
 
 /* ---------- 공지 ---------- */
@@ -438,10 +437,6 @@ function learnDetail(ctx, spots, si) {
     }),
     addTopic: () => openForm({ title: "질문 추가", fields: TOPIC_FIELDS, onSave: v => mut("learn", a => { (a[si].topics = a[si].topics || []).push(v); }) })
   });
-  const mq = window.matchMedia("(min-width: 900px)");
-  const re = () => learnDetail(ctx, S.get("learn"), si);
-  mq.addEventListener("change", re);
-  ctx.leave(() => mq.removeEventListener("change", re));
 }
 
 /* ---------- O/X 퀴즈 ---------- */
@@ -462,7 +457,7 @@ export function pageQuiz(ctx) {
   const rankHtml = () => !S.configured
     ? '<div class="empty">Firebase 연결 후 랭킹이 보여요.</div>'
     : scores.length
-      ? `<ol class="rank">${scores.map((s, i) => `<li><span>${i + 1}</span><span>${esc(s.cls)}반 ${esc(s.name)}</span><span class="sc">${s.score}/${s.total}</span>${S.isTeacher() ? `<button class="mini danger" data-act="delScore" data-id="${s.id}">삭제</button>` : ""}</li>`).join("")}</ol>`
+      ? `<ol class="rank">${scores.map((s, i) => `<li><span>${i + 1}</span><span>${esc(s.cls)}반 ${esc(s.name)}</span><span class="sc">${esc(s.score)}/${esc(s.total)}</span>${S.isTeacher() ? `<button class="mini danger" data-act="delScore" data-id="${s.id}">삭제</button>` : ""}</li>`).join("")}</ol>`
       : '<div class="empty">아직 기록이 없어요. 첫 도전자가 되어 보세요!</div>';
 
   const qHtml = () => {
@@ -545,7 +540,7 @@ export function pageQuiz(ctx) {
 
 /* ---------- 포토존 (사진은 패들렛에) ---------- */
 export function pagePhoto(ctx) {
-  const link = padletLink();
+  const link = safeUrl(padletLink());
   page(ctx, `
     <div class="board"><div class="pol"><div class="ph">${icon("cam")}반별 사진은 패들렛에</div>
       <p>반별로 주제에 맞는 사진을 올려주세요.<br>수학여행이 끝나고 베스트 포토상을 뽑아요.</p></div></div>
@@ -554,7 +549,7 @@ export function pagePhoto(ctx) {
     editPadlet: () => openForm({
       title: "패들렛 링크 수정",
       fields: [{ k: "padlet", label: "패들렛 주소 (비우면 '준비 중'으로 보여요)", ph: "https://padlet.com/..." }],
-      values: { padlet: link },
+      values: { padlet: padletLink() },
       onSave: v => save("settings", { ...settingsForSave(), padlet: v.padlet })
     })
   });

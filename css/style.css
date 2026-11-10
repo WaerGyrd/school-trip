@@ -13,7 +13,7 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--bg); color: var(--tx); font: 15px/1.5 "Free", -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; min-height: 100vh; }
+body { margin: 0; background: var(--bg); color: var(--tx); font: 15px/1.5 "Free", -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; min-height: 100vh; overflow-wrap: anywhere; }
 a { color: inherit; }
 img { max-width: 100%; }
 button { font: inherit; cursor: pointer; color: inherit; }
@@ -203,7 +203,7 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
 .map { width: 100%; aspect-ratio: 4 / 3; border: 0; border-radius: 10px; display: block; background: var(--surf); object-fit: cover; }
 .kv { display: flex; gap: 22px; margin: 10px 0 6px; font-size: 12px; color: var(--mute); }
 .kv b { display: block; font-family: "A2Z"; font-size: 17px; color: var(--tx); }
-.note { font-size: 13px; color: var(--mute); margin: 4px 0 8px; }
+.note { font-size: 13px; color: var(--mute); margin: 4px 0 8px; white-space: pre-line; }
 .lk { font-size: 13px; border-bottom: 1.5px solid var(--tx); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
 .lk svg.ic { width: 14px; height: 14px; }
 .rview { background: var(--surf); border: 1px solid var(--line); border-radius: 14px; padding: 22px; margin-top: 16px; }
@@ -255,7 +255,7 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
 .exp { padding: 20px 20px 24px; position: relative; }
 .exp .k { font-size: 12px; letter-spacing: 1.5px; color: var(--pmute); }
 .exp h3 { font-size: 21px; margin: 4px 0 10px; padding-right: 30px; }
-.exp p { margin: 0; font-size: 15px; line-height: 1.75; }
+.exp p { margin: 0; font-size: 15px; line-height: 1.75; white-space: pre-line; }
 .exp .back { position: absolute; top: 18px; right: 18px; color: #777; }
 .exp .edit { color: var(--pmute); border-color: var(--pline); }
 .quiz-go { margin-top: 26px; border-color: #fff; color: #fff; }
@@ -289,7 +289,7 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
 .ox button:active { background: var(--ink); color: #fff; }
 .fb { font-family: "A2Z"; font-size: 18px; margin: 4px 0; }
 .fb.ok { color: var(--d1); } .fb.no { color: var(--c36); }
-.qexp { font-size: 14.5px; margin: 6px 0 16px; }
+.qexp { font-size: 14.5px; margin: 6px 0 16px; white-space: pre-line; }
 .qscore { font-family: "A2Z"; font-size: 44px; margin: 6px 0; }
 .rank { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--tx); }
 .rank li { display: grid; grid-template-columns: 34px 1fr auto auto; gap: 8px; align-items: center; padding: 11px 2px; border-bottom: 1px solid var(--line); font-size: 15px; }
