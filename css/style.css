@@ -112,3 +112,26 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
   #modal { align-items: center; }
   .modal-box { border-radius: 18px; }
 }
+
+/* ===== 홈 ===== */
+.home { position: relative; min-height: 100vh; overflow: hidden; color: #fff; background: #0b1020 url(../assets/hero.jpg) center/cover; }
+.home::before { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, .25); }
+.home > * { position: relative; }
+.home .wm { display: block; width: 170px; margin: 0 auto; padding-top: 34px; }
+.home .wm-txt { font-family: "A2Z"; font-size: 30px; text-align: center; width: auto; line-height: 1.1; }
+.hcm { font-family: "Forward", serif; font-size: 52px; line-height: 1.05; margin: 96px 0 0 30px; text-shadow: 0 2px 12px rgba(0, 0, 0, .35); }
+.bub { display: flex; align-items: flex-end; gap: 6px; margin: 28px 22px 0; }
+.bub img { width: 46px; height: 46px; flex: none; border-radius: 50%; background: #fff; }
+.bub p { margin: 0; background: #E9E9EB; color: #111; border-radius: 16px; padding: 12px 16px; font-size: 14.5px; line-height: 1.55; position: relative; max-width: 350px; white-space: pre-line; }
+.bub p::before { content: ""; position: absolute; left: -7px; bottom: 0; width: 16px; height: 16px; background: #E9E9EB; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+.home-edit { margin: 10px 0 0 74px; }
+.home-edit .edit { color: #fff; border-color: rgba(255, 255, 255, .6); }
+.home .dev { position: absolute; bottom: 14px; left: 0; right: 0; text-align: center; font-size: 13px; text-shadow: 0 1px 4px #000; }
+@media (min-width: 900px) {
+  .home .wm { position: absolute; top: 34px; right: 31%; width: 160px; padding: 0; margin: 0; }
+  .hcm { font-size: 96px; margin: 220px 0 0 9%; }
+  .home .bub { position: absolute; top: 240px; right: 6%; margin: 0; }
+  .bub p { max-width: 420px; font-size: 17px; }
+  .home-edit { position: absolute; top: 200px; right: 6%; margin: 0; }
+  .home .dev { left: 40px; right: auto; text-align: left; bottom: 22px; }
+}

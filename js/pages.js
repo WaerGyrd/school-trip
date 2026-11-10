@@ -1,5 +1,6 @@
 import { $, esc, hashNum, ls, toast, vnNow, fmtTime, openForm, openModal, closeModal, compressImage } from "./util.js";
 import * as S from "./store.js";
+import { icon } from "./icons.js";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -29,10 +30,10 @@ async function doReset(id) {
   if (!confirm("이 페이지의 수정 내용을 모두 지우고 기본값으로 되돌릴까요?")) return;
   try { await S.resetContent(id); toast("기본값으로 되돌렸어요", 2000); } catch (e) { alert(e.message || e); }
 }
-const resetBar = id => ed() ? `<div class="resetbar"><button class="mini danger" data-act="reset" data-id="${id}">↺ 기본값으로 되돌리기</button></div>` : "";
-const addBtn = (act, label) => ed() ? `<div class="addbar"><button class="btn ghost" data-act="${act}">＋ ${label}</button></div>` : "";
-const pen = (act, attrs = "") => ed() ? `<button class="mini" data-act="${act}" ${attrs}>✏️</button>` : "";
-const offlineBanner = () => S.configured ? "" : `<div class="banner-warn">⚠️ 아직 Firebase가 연결되지 않았어요. 연결하기 전에는 이 기능을 쓸 수 없어요.</div>`;
+const resetBar = id => ed() ? `<div class="resetbar"><button class="mini danger" data-act="reset" data-id="${id}">기본값으로 되돌리기</button></div>` : "";
+const addBtn = (act, label) => ed() ? `<div class="addbar"><button class="btn ghost" data-act="${act}">${label}</button></div>` : "";
+const pen = (act, attrs = "") => ed() ? `<button class="edit" data-act="${act}" ${attrs}>수정</button>` : "";
+const offlineBanner = () => S.configured ? "" : `<div class="banner-warn">아직 Firebase가 연결되지 않았어요. 연결하기 전에는 이 기능을 쓸 수 없어요.</div>`;
 
 const dayIndex = (days, arg) => {
   let di = parseInt(arg, 10);
@@ -45,34 +46,16 @@ const dayIndex = (days, arg) => {
 
 /* ---------- 메인 ---------- */
 export function pageHome(ctx) {
+  ctx.setTop({ variant: "overlay" });
   const st = S.settings();
-  const diff = Math.round((Date.parse("2026-11-18") - Date.parse(vnNow().date)) / 864e5);
-  const dd = diff > 0 ? "D-" + diff : diff === 0 ? "D-DAY" : diff >= -2 ? "여행 중 ✈️" : "추억이 되었어요";
-  const links = [
-    ["#/schedule", "📅", "일정"], ["#/route", "🗺️", "이동 경로"],
-    ["#/notice", "📢", "공지 사항"], ["#/learn", "📚", "배워 가기"],
-    ["#/quiz", "❓", "O/X 퀴즈"], ["#/photo", "📸", "포토존"],
-    ["#/teachers", "💖", "쌤 소개"]
-  ];
   ctx.view.innerHTML = `
-    <section class="hero" style="--hero:url('assets/hero.jpg')">
-      <div class="hero-in">
-        <img class="logo" src="assets/logo.png" alt="KISH" onerror="this.remove()">
-        <span class="dday">${dd}</span>
-        <h1>호치민 · 붕따우<br>고1 수학여행</h1>
-        <div>2026.11.18 (수) ~ 11.20 (금) · 2박 3일</div>
-      </div>
-    </section>
-    <div class="page">
-      <div class="card">
-        <p style="margin:0;white-space:pre-line">${esc(st.home.desc)}</p>
-        ${ed() ? '<div class="row end"><button class="mini" data-act="editHome">✏️ 소개 글 수정</button></div>' : ""}
-      </div>
-      <div class="links">
-        ${links.map((l, i) => `<a href="${l[0]}" ${i === links.length - 1 ? 'style="grid-column:1/-1"' : ""}>${l[1]}<br>${l[2]}</a>`).join("")}
-      </div>
-      <div class="dev">만든 사람 · 10229 조수민 · 10524 이동선</div>
-    </div>`;
+    <section class="home">
+      <img class="wm" src="assets/kish-wordmark.png" alt="KISH 10학년 수학여행" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'wm wm-txt',textContent:'KISH 10학년 수학여행'}))">
+      <div class="hcm">Ho Chi<br>Minh City</div>
+      <div class="bub"><img src="assets/logo.png" alt="" onerror="this.remove()"><p>${esc(st.home.desc)}</p></div>
+      ${ed() ? '<div class="home-edit">' + pen("editHome") + "</div>" : ""}
+      <div class="dev">개발자: 10229 조수민, 10524 이동선</div>
+    </section>`;
   bind(ctx, {
     editHome: () => openForm({
       title: "메인 소개 글",
