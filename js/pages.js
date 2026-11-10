@@ -1,4 +1,5 @@
-import { $, esc, hashNum, ls, toast, vnNow, fmtTime, fmtNoticeTime, openForm, openModal, closeModal, compressImage } from "./util.js";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js";
+import { DEFAULTS } from "./data.js";
 import * as S from "./store.js";
 import { icon } from "./icons.js";
 import { pickRound } from "./quiz.js";
@@ -45,6 +46,14 @@ const dayIndex = (days, arg) => {
   return di;
 };
 
+/* ---------- 설정(settings) ---------- */
+// store.js 의 S.settings() 는 home·teams 만 돌려줘서, 그대로 저장하면 padlet 이 지워진다.
+export function padletLink() {
+  const v = (S.state.content.settings || {}).padlet;
+  return v !== undefined ? v : DEFAULTS.settings.padlet;
+}
+const settingsForSave = () => ({ ...S.settings(), padlet: padletLink() });
+
 /* ---------- 메인 ---------- */
 export function pageHome(ctx) {
   ctx.setTop({ variant: "overlay" });
@@ -62,7 +71,7 @@ export function pageHome(ctx) {
       title: "메인 소개 글",
       fields: [{ k: "desc", label: "소개 글", type: "textarea", rows: 5 }],
       values: { desc: st.home.desc },
-      onSave: v => { const cur = S.settings(); return save("settings", { ...cur, home: { ...cur.home, desc: v.desc } }); }
+      onSave: v => { const cur = settingsForSave(); return save("settings", { ...cur, home: { ...cur.home, desc: v.desc } }); }
     })
   });
 }
@@ -182,7 +191,7 @@ function scheduleDay(ctx, days, di) {
 
   function dayMut(fn) { return mut("schedule", a => fn(a[di - 1])); }
   function saveTeams(map) {
-    const cur = S.settings();
+    const cur = settingsForSave();
     const t = clone(cur.teams || {});
     t[di] = map;
     return save("settings", { ...cur, teams: t });
@@ -534,85 +543,21 @@ export function pageQuiz(ctx) {
   ctx.leave(S.watchScores(list => { scores = list; const el = $("#rank"); if (el) el.innerHTML = rankHtml(); }));
 }
 
-/* ---------- 포토존 ---------- */
-let photos = [];
-
+/* ---------- 포토존 (사진은 패들렛에) ---------- */
 export function pagePhoto(ctx) {
-  const f = /^[1-6]$/.test(ctx.args[0]) ? ctx.args[0] : "all";
-  const tabs = [["all", "전체"], ...CLASSES.map(c => [String(c), c + "반"])];
-
-  const draw = () => {
-    const el = $("#board");
-    if (!el) return;
-    const list = f === "all" ? photos : photos.filter(p => String(p.cls) === f);
-    const best = new Set();
-    CLASSES.forEach(c => {
-      const ps = photos.filter(p => p.cls === c && (p.likes || 0) > 0);
-      if (ps.length) best.add(ps.reduce((a, b) => ((b.likes || 0) > (a.likes || 0) ? b : a)).id);
-    });
-    const lk = ls.get("liked", {});
-    el.innerHTML = list.length
-      ? `<div class="cork" style="--cork:url('assets/cork.jpg')">${list.map(p => `
-        <figure class="polaroid" style="--rot:${(hashNum(p.id) % 7) - 3}deg">
-          <img src="${esc(p.img)}" alt="" loading="lazy" data-act="view" data-id="${p.id}">
-          <figcaption class="pol-cap">${esc(p.caption || "")}</figcaption>
-          <div class="pol-foot">
-            <span>${esc(p.cls)}반 ${best.has(p.id) ? '<span class="badge b-best">🏆BEST</span>' : ""}</span>
-            <span><button class="like ${lk[p.id] ? "on" : ""}" data-act="like" data-id="${p.id}">${lk[p.id] ? "❤️" : "🤍"} ${p.likes || 0}</button>${S.isTeacher() ? `<button class="mini danger" data-act="delP" data-id="${p.id}">✕</button>` : ""}</span>
-          </div>
-        </figure>`).join("")}</div>`
-      : '<div class="empty">아직 사진이 없어요.<br>첫 사진을 올려 보세요! 📸</div>';
-  };
-
+  const link = padletLink();
   page(ctx, `
-    <h2>📸 포토존</h2>
-    ${offlineBanner()}
-    <div class="tabs">${tabs.map(([k, l]) => `<a class="tab ${f === k ? "on" : ""}" href="#/photo/${k}">${l}</a>`).join("")}</div>
-    <div class="addbar"><button class="btn primary" data-act="upload">📷 사진 올리기</button></div>
-    <div class="sub" style="margin-bottom:8px">하트(🤍)를 눌러 마음에 드는 사진에 투표해요. 반마다 하트가 가장 많은 사진에 🏆BEST가 붙어요.</div>
-    <div id="board"></div>`, {
-    upload: () => openForm({
-      title: "사진 올리기",
-      saveText: "올리기",
-      fields: [
-        { k: "cls", label: "반", type: "select", options: CLASSES.map(c => [String(c), c + "반"]) },
-        { k: "caption", label: "한 줄 설명 (선택, 60자까지)", ph: "예: 붕따우 바다에서!" },
-        { k: "file", label: "사진", type: "file", req: true }
-      ],
-      values: { cls: f !== "all" ? f : String(ls.get("myclass", 0) || 1) },
-      onSave: async v => {
-        if (!v.file) { alert("사진을 골라 주세요."); return false; }
-        try {
-          const img = await compressImage(v.file);
-          await S.addPhoto({ img, cls: Number(v.cls), caption: (v.caption || "").slice(0, 60) });
-          toast("사진을 올렸어요 📸", 2000);
-          return true;
-        } catch (e) { alert("올리지 못했어요.\n" + (e.message || e)); return false; }
-      }
-    }),
-    view: d => {
-      const p = photos.find(x => x.id === d.id);
-      if (!p) return;
-      openModal(`<img class="photo-big" src="${esc(p.img)}" alt=""><p>${esc(p.caption || "")}</p><div class="row end"><button class="btn ghost" id="pvClose">닫기</button></div>`);
-      $("#pvClose").onclick = closeModal;
-    },
-    like: async d => {
-      const lk = ls.get("liked", {});
-      const was = !!lk[d.id];
-      if (was) delete lk[d.id]; else lk[d.id] = 1;
-      ls.set("liked", lk); draw();
-      try { await S.likePhoto(d.id, was ? -1 : 1); }
-      catch (e) {
-        if (was) lk[d.id] = 1; else delete lk[d.id];
-        ls.set("liked", lk); draw();
-        alert("투표하지 못했어요.\n" + (e.message || e));
-      }
-    },
-    delP: async d => { if (confirm("이 사진을 삭제할까요?")) { try { await S.deletePhoto(d.id); } catch (e) { alert(e.message || e); } } }
+    <div class="board"><div class="pol"><div class="ph">${icon("cam")}반별 사진은 패들렛에</div>
+      <p>반별로 주제에 맞는 사진을 올려주세요.<br>수학여행이 끝나고 베스트 포토상을 뽑아요.</p></div></div>
+    ${link ? `<a class="pbtn" href="${esc(link)}" target="_blank" rel="noopener">패들렛에서 사진 올리기 ${icon("out")}</a>` : '<span class="pbtn off">패들렛 링크 준비 중이에요</span>'}
+    ${ed() ? `<div class="row" style="justify-content:center;margin-top:12px">${pen("editPadlet")}</div>` : ""}`, {
+    editPadlet: () => openForm({
+      title: "패들렛 링크 수정",
+      fields: [{ k: "padlet", label: "패들렛 주소 (비우면 '준비 중'으로 보여요)", ph: "https://padlet.com/..." }],
+      values: { padlet: link },
+      onSave: v => save("settings", { ...settingsForSave(), padlet: v.padlet })
+    })
   });
-
-  draw();
-  ctx.leave(S.watchPhotos(list => { photos = list; draw(); }));
 }
 
 /* ---------- 쌤 소개 ---------- */
@@ -627,14 +572,13 @@ const T_FIELDS = [
 export function pageTeachers(ctx) {
   const list = S.get("teachers");
   page(ctx, `
-    <h2>💖 쌤 소개</h2>
-    <div class="card">쌤들이 <b>파워퍼프걸</b>로 변신했어요! 💖💙💚<br><span class="sub">카드 색깔로 쌤들을 만나 보세요.</span></div>
+    <p class="intro">쌤들이 파워퍼프걸로 변신했어요!</p>
     <div class="tgrid">${list.map((t, i) => `
-      <div class="tcard c${i % 3}">
+      <div class="tc t${i % 3}">
+        ${t.role || t.subject ? `<small>${esc([t.role, t.subject].filter(Boolean).join(" · "))}</small>` : ""}
         <h3>${esc(t.name)}</h3>
-        <div class="nick">${esc([t.role, t.nick].filter(Boolean).join(" · "))}</div>
-        ${t.subject ? `<div class="nick">📖 ${esc(t.subject)}</div>` : ""}
-        <p>${t.intro ? esc(t.intro) : "소개를 준비 중이에요 ✨"}</p>
+        ${t.nick ? `<div class="nick">${esc(t.nick)}</div>` : ""}
+        <p>${t.intro ? esc(t.intro) : "소개를 준비 중이에요"}</p>
         ${pen("editT", `data-i="${i}"`)}
       </div>`).join("")}</div>
     ${addBtn("addT", "쌤 추가")}
@@ -645,9 +589,6 @@ export function pageTeachers(ctx) {
       onSave: v => mut("teachers", a => { a[d.i] = v; }),
       onDelete: () => mut("teachers", a => { a.splice(d.i, 1); })
     }),
-    addT: () => openForm({
-      title: "쌤 추가", fields: T_FIELDS,
-      onSave: v => mut("teachers", a => { a.push(v); })
-    })
+    addT: () => openForm({ title: "쌤 추가", fields: T_FIELDS, onSave: v => mut("teachers", a => { a.push(v); }) })
   });
 }

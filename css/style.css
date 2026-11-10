@@ -303,3 +303,28 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
   .qcols { display: grid; grid-template-columns: 1.2fr 1fr; gap: 50px; align-items: start; }
   .rankbox .stitle { margin-top: 8px; }
 }
+
+/* ===== 포토존 ===== */
+.board { margin: 12px 6px 0; border-radius: 6px; background: #b88a55 url(../assets/cork.jpg); border: 10px solid #5a4632; padding: 34px 18px 40px; box-shadow: 0 12px 30px rgba(0, 0, 0, .45); }
+.pol { background: #fbfaf6; color: var(--ink); width: 88%; max-width: 400px; margin: 0 auto; padding: 14px 14px 22px; transform: rotate(-2deg); box-shadow: 0 6px 14px rgba(0, 0, 0, .35); position: relative; }
+.pol::before { content: ""; position: absolute; top: -10px; left: calc(50% - 46px); width: 92px; height: 24px; background: rgba(255, 255, 255, .6); transform: rotate(3deg); }
+.pol .ph { aspect-ratio: 4 / 3; background: #2b2f38; color: #cfd3da; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; font-size: 14px; }
+.pol .ph svg.ic { width: 48px; height: 48px; stroke-width: 1.5; }
+.pol p { margin: 14px 2px 0; font-size: 14.5px; }
+.pbtn { display: flex; align-items: center; justify-content: center; gap: 6px; max-width: 400px; margin: 28px auto 0; border: 1.5px solid var(--tx); border-radius: 12px; padding: 15px; font-family: "A2Z"; font-size: 17px; text-decoration: none; background: var(--tx); color: var(--ink); }
+.pbtn.off { background: none; color: var(--mute); }
+
+/* ===== 쌤 소개 ===== */
+.intro { color: var(--mute); font-size: 14px; margin: 4px 0 0; }
+.tgrid { display: grid; gap: 12px; margin-top: 14px; }
+.tc { border-radius: 14px; padding: 18px 20px; color: var(--ink); min-height: 120px; }
+.tc small { font-size: 12px; letter-spacing: 1px; }
+.tc h3 { font-size: 24px; margin: 4px 0 6px; }
+.tc .nick { font-size: 13px; margin-bottom: 4px; }
+.tc p { margin: 0; font-size: 14px; color: #333; white-space: pre-line; }
+.tc .edit { color: #333; border-color: rgba(0, 0, 0, .3); margin-top: 8px; }
+.t0 { background: #F4A7C3; } .t1 { background: #9FD3F2; } .t2 { background: #A8D88E; }
+@media (min-width: 900px) {
+  .board { max-width: 900px; margin: 20px auto 0; padding: 50px; }
+  .tgrid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+}
