@@ -1,4 +1,4 @@
-import { $, esc, hashNum, ls, toast, vnNow, fmtTime, openForm, openModal, closeModal, compressImage } from "./util.js";
+import { $, esc, hashNum, ls, toast, vnNow, fmtTime, fmtNoticeTime, openForm, openModal, closeModal, compressImage } from "./util.js";
 import * as S from "./store.js";
 import { icon } from "./icons.js";
 
@@ -302,7 +302,7 @@ function noticeForm(n) {
       try {
         const data = { cls: Number(v.cls), title: v.title, body: v.body, pinned: !!v.pinned };
         if (n) await S.updateNotice(n.id, data); else await S.addNotice(data);
-        toast(n ? "공지를 수정했어요" : "공지를 올렸어요 📢", 2000);
+        toast(n ? "공지를 수정했어요" : "공지를 올렸어요", 2000);
         return true;
       } catch (e) { alert("저장하지 못했어요.\n" + (e.message || e)); return false; }
     }
@@ -310,32 +310,33 @@ function noticeForm(n) {
 }
 
 export function pageNotice(ctx) {
-  const f = ctx.args[0] || "all";
+  const f = ctx.args[0] === "common" || /^[1-6]$/.test(ctx.args[0]) ? ctx.args[0] : "all";
   const t = S.state.teacher;
   let list = S.state.notices.slice();
   if (f === "common") list = list.filter(n => n.cls === 0);
-  else if (/^[1-6]$/.test(f)) list = list.filter(n => n.cls === 0 || n.cls === Number(f));
+  else if (f !== "all") list = list.filter(n => n.cls === 0 || n.cls === Number(f));
   list.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
-  const tabs = [["all", "전체"], ["common", "공통"], ...CLASSES.map(c => [String(c), c + "반"])];
+  const tabs = [["common", "공통"], ...CLASSES.map(c => [String(c), c + "반"])];
   const canEdit = n => t && (n.authorUid === t.uid || t.classNo === 0);
+  const heading = f === "all" ? "최근 공지 사항" : f === "common" ? "공통 공지사항" : `10-${f} 공지사항`;
+  const who = n => n.cls === 0 ? `${n.authorName || ""} 선생님` : `${n.cls}반 ${n.authorName || ""} 선생님`;
 
   const cards = list.map(n => `
-    <article class="card notice ${n.pinned ? "pinned" : ""}">
-      <h4>${n.pinned ? "📌 " : ""}${esc(n.title)} <span class="badge ${n.cls === 0 ? "b-c" : ""}">${n.cls === 0 ? "공통" : n.cls + "반"}</span></h4>
-      <div class="body">${esc(n.body)}</div>
-      <div class="meta">${esc(n.authorName || "")} · ${fmtTime(n.createdAt)}${n.updatedAt ? " (수정됨)" : ""}</div>
-      ${canEdit(n) ? `<div class="row end"><button class="mini" data-act="editN" data-id="${n.id}">✏️ 수정</button><button class="mini danger" data-act="delN" data-id="${n.id}">삭제</button></div>` : ""}
+    <article class="ntc paper ${n.pinned ? "pin" : ""}">
+      <div class="who"><span class="badge ${n.cls === 0 ? "b-common" : "b-" + n.cls}">${n.cls === 0 ? "공통" : n.cls + "반"}</span>${esc(who(n))}${n.pinned ? '<span class="pinl">고정</span>' : ""}</div>
+      <h4>${esc(n.title)}</h4>
+      <p>${esc(n.body)}</p>
+      <time>${fmtNoticeTime(n.createdAt)}${n.updatedAt ? " (수정됨)" : ""}</time>
+      ${canEdit(n) ? `<div class="row end"><button class="edit" data-act="editN" data-id="${n.id}">수정</button><button class="mini danger" data-act="delN" data-id="${n.id}">삭제</button></div>` : ""}
     </article>`).join("");
 
-  const html = `
-    <h2>📢 공지 사항</h2>
+  page(ctx, `
     ${offlineBanner()}
-    <div class="tabs">${tabs.map(([k, l]) => `<a class="tab ${f === k ? "on" : ""}" href="#/notice/${k}">${l}</a>`).join("")}</div>
-    <div class="banner-warn">🚨 담임 선생님 긴급 연락처는 📌 고정 공지로 올라와요.</div>
-    ${t ? '<div class="addbar"><button class="btn primary" data-act="newN">＋ 공지 쓰기</button></div>' : '<div class="sub">선생님은 메뉴(☰)에서 로그인하면 공지를 쓸 수 있어요.</div>'}
-    ${cards || `<div class="empty">${S.state.noticesReady || !S.configured ? "공지가 아직 없어요." : "불러오는 중…"}</div>`}`;
-
-  page(ctx, html, {
+    <div class="chips">${tabs.map(([k, l]) => `<a class="chip ${f === k ? "on" : ""}" href="#/notice${f === k ? "" : "/" + k}">${l}</a>`).join("")}</div>
+    ${t ? '<div class="addbar"><button class="btn primary" data-act="newN">공지 쓰기</button></div>' : ""}
+    <div class="stitle">${heading}</div>
+    ${cards ? `<div class="ngrid">${cards}</div>` : `<div class="empty">${S.state.noticesReady || !S.configured ? "공지가 아직 없어요." : "불러오는 중…"}</div>`}
+    ${t ? "" : '<p class="mute small-note">선생님은 메뉴에서 로그인하면 공지를 쓸 수 있어요.</p>'}`, {
     newN: () => noticeForm(null),
     editN: d => { const n = S.state.notices.find(x => x.id === d.id); if (n) noticeForm(n); },
     delN: async d => {

@@ -213,3 +213,19 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
   .seg { max-width: 560px; }
   .rsplit { display: grid; grid-template-columns: 400px 1fr; gap: 40px; align-items: start; }
 }
+
+/* ===== 공지 ===== */
+.ntc { padding: 16px 18px 14px; margin: 0 0 14px; }
+.ntc .who { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--pmute); }
+.ntc .pinl { margin-left: auto; font-size: 11px; color: var(--d3); font-weight: 700; letter-spacing: 1px; }
+.ntc.pin { box-shadow: inset 0 0 0 2px var(--d3l); }
+.ntc h4 { font-size: 19px; margin: 8px 0 6px; }
+.ntc p { margin: 0; font-size: 14.5px; white-space: pre-line; overflow-wrap: anywhere; }
+.ntc time { display: block; margin-top: 10px; font-size: 12px; color: var(--pmute); border-top: 1px dashed var(--pline); padding-top: 8px; }
+.ntc .edit { color: var(--pmute); border-color: var(--pline); }
+.ntc h4 { overflow-wrap: anywhere; }
+.small-note { font-size: 12px; margin-top: 18px; }
+@media (min-width: 900px) {
+  .ngrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; align-items: start; }
+  .ngrid .ntc { margin: 0; }
+}
