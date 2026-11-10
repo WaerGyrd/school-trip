@@ -40,6 +40,8 @@ export async function openPage({ width = 390, height = 844, hash = "#/", fake = 
   await page.goto(`http://127.0.0.1:${port}/index.html${hash}`);
   if (wait) await page.waitForFunction(() => { const v = document.querySelector("#view"); return v && v.children.length && !v.querySelector(":scope > .empty"); }, null, { timeout: 8000 });
   await page.evaluate(() => document.fonts && document.fonts.ready);
+  // 첫 데이터·로그인 이벤트로 화면이 한 번 더 그려지므로(app.js refresh 120ms) 잠깐 기다린다
+  if (wait) await page.waitForTimeout(400);
   return { page, close: () => ctx.close() };
 }
 export async function closeAll() {
