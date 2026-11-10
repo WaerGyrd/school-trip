@@ -75,93 +75,117 @@ const ITEM_FIELDS = [
   { k: "desc", label: "설명", type: "textarea", rows: 3 },
   { k: "team", label: "대상", type: "select", options: TEAM_OPTS }
 ];
-const teamBadge = t => t === "A" ? '<span class="badge b-A">A팀</span>' : t === "B" ? '<span class="badge b-B">B팀</span>' : t === "tbd" ? '<span class="badge b-tbd">미정</span>' : "";
-const teamBadgeC = t => t === "A" ? '<span class="badge b-A">A</span>' : t === "B" ? '<span class="badge b-B">B</span>' : '<span class="badge b-tbd">미정</span>';
+const DAY_FIELDS = [
+  { k: "label", label: "날짜 표시 (예: 11/18 (수))", req: true },
+  { k: "title", label: "큰 제목 (예: 붕따우)", req: true },
+  { k: "summary", label: "일정 티켓에 보일 주요 장소" },
+  { k: "tagline", label: "상세 화면 한 줄 설명" },
+  { k: "info", label: "안내 문구", type: "textarea", rows: 3 }
+];
+const WEEK = { "월": "월요일", "화": "화요일", "수": "수요일", "목": "목요일", "금": "금요일", "토": "토요일", "일": "일요일" };
+const DAY_COLOR = ["var(--d1)", "var(--d2)", "var(--d3)"];
+const DAY_LIGHT = ["var(--d1l)", "var(--d2l)", "var(--d3l)"];
+// 예전에 저장된 "DAY 1 · ..." 형식 제목도 깔끔하게
+export const dayTitle = d => String(d.title || "").replace(/^DAY\s*\d+\s*·\s*/, "");
+const mmdd = d => (d.date || "").slice(5).replace("-", ".");
+const wday = d => (String(d.label || "").match(/\((.)\)/) || [])[1] || "";
+const tbdBadge = t => t === "tbd" ? ' <span class="badge b-todo">미정</span>' : "";
+
+function tripRange(days) {
+  if (!days.length) return "";
+  const f = s => (s || "").replaceAll("-", ". ");
+  const a = days[0].date, b = days[days.length - 1].date;
+  return `${f(a)} – ${f(b).slice(6)} · ${days.length - 1}박 ${days.length}일`;
+}
 
 export function pageSchedule(ctx) {
   const days = S.get("schedule");
-  const now = vnNow();
-  const di = dayIndex(days, ctx.args[0]);
-  const day = days[di - 1];
-  if (!day) return page(ctx, '<div class="empty">일정이 없어요.</div>');
+  if (!days.length) return page(ctx, '<div class="empty">일정이 없어요.</div>');
+  const di = parseInt(ctx.args[0], 10);
+  if (!(di >= 1 && di <= days.length)) return scheduleList(ctx, days);
+  return scheduleDay(ctx, days, di);
+}
 
+function scheduleList(ctx, days) {
+  const tks = days.map((d, i) => `
+    <a class="tk" href="#/schedule/${i + 1}">
+      <div class="stub"><div class="d">${esc(mmdd(d))}</div><div class="w">${esc(WEEK[wday(d)] || "")}</div><span class="badge" style="background:${DAY_COLOR[i % 3]}">DAY ${i + 1}</span></div>
+      <div class="body"><b>${esc(dayTitle(d)).replaceAll(" → ", "<br>→ ").replace("<br>", " ")}</b>${d.summary ? `<p>${esc(d.summary)}</p>` : ""}</div>
+      ${icon("right", "go")}
+    </a>`).join("");
+  ctx.view.innerHTML = `
+    <section class="sched-list">
+      <p class="lead">${esc(tripRange(days))}</p>
+      <div class="tks">${tks}</div>
+      ${resetBar("schedule")}
+      <div class="dev">개발자: 10229 조수민, 10524 이동선</div>
+    </section>`;
+  bind(ctx, { reset: d => doReset(d.id) });
+}
+
+function scheduleDay(ctx, days, di) {
+  ctx.setTop({ variant: "bare" });
+  const day = days[di - 1];
+  const now = vnNow();
   const teams = (S.settings().teams && S.settings().teams[di]) || {};
   const myc = ls.get("myclass", 0);
   const myTeam = myc ? teams[myc] || "" : "";
-  const explicit = ["all", "A", "B"].includes(ctx.args[1]);
-  const team = explicit ? ctx.args[1] : (myTeam === "A" || myTeam === "B" ? myTeam : "all");
-  const suffix = explicit ? "/" + ctx.args[1] : "";
+  const hasTeams = day.items.some(i => i.team === "A" || i.team === "B");
+  const team = !hasTeams ? "all" : ["A", "B"].includes(ctx.args[1]) ? ctx.args[1] : (myTeam === "B" ? "B" : "A");
 
   const list = day.items.map((it, i) => ({ it, i }))
     .filter(({ it }) => team === "all" || ["all", "tbd", team].includes(it.team))
     .sort((a, b) => (a.it.t || "").localeCompare(b.it.t || "") || (a.it.e || "").localeCompare(b.it.e || ""));
-
-  const rows = list.map(({ it, i }) => {
+  const li = ({ it, i }) => {
     const isNow = day.date === now.date && it.t && it.e && it.t <= now.time && now.time < it.e;
-    return `<li class="tl-item ${isNow ? "now" : ""}">
-      <div class="tl-time">${esc(it.t || "")}${it.e ? `<small>~${esc(it.e)}</small>` : ""}</div>
-      <div class="tl-body"><b>${esc(it.title)}</b>${teamBadge(it.team)}${isNow ? '<span class="now-tag">지금</span>' : ""} ${pen("editItem", `data-i="${i}"`)}
-        ${it.desc ? `<p>${esc(it.desc)}</p>` : ""}</div></li>`;
-  }).join("");
-
-  const hasTeams = day.items.some(i => i.team === "A" || i.team === "B");
-  const teamCard = (hasTeams || ed()) ? `
-    <div class="card"><b>반별 팀 배정</b>
-      ${ed() ? `${pen("editTeams")} <button class="mini" data-act="teamPreset">1~3반 A · 4~6반 B 적용</button>` : ""}
-      <div class="row" style="margin-top:8px">${CLASSES.map(c => `<span>${c}반 ${teamBadgeC(teams[c])}</span>`).join(" ")}</div>
-      <div class="sub" style="margin-top:6px">${myc ? `내 반(${myc}반): ${myTeam ? myTeam + "팀" : "미정"}` : "메뉴(☰)에서 '내 반'을 고르면 내 팀 일정이 먼저 열려요."}</div>
-    </div>` : "";
-
-  const html = `
-    <h2>📅 일정</h2>
-    <div class="daybtns">${days.map((d, i) => `<a class="${i + 1 === di ? "on" : ""}" href="#/schedule/${i + 1}${suffix}">${esc(d.label)}<br>DAY ${i + 1}${d.date === now.date ? '<span class="today-b">TODAY</span>' : ""}</a>`).join("")}</div>
-    <div class="tabs">${[["all", "전체"], ["A", "A팀"], ["B", "B팀"]].map(([k, l]) => `<a class="tab ${team === k ? "on" : ""}" href="#/schedule/${di}/${k}">${l}</a>`).join("")}</div>
-    <div class="card"><b>${esc(day.title)}</b> ${pen("editDay")}${day.info ? `<div class="sub" style="margin-top:4px">${esc(day.info)}</div>` : ""}</div>
-    ${teamCard}
-    ${rows ? `<ul class="tl">${rows}</ul>` : '<div class="empty">표시할 일정이 없어요.</div>'}
-    ${addBtn("addItem", "일정 추가")}
-    ${resetBar("schedule")}`;
-
-  const dayMut = fn => mut("schedule", a => fn(a[di - 1]));
-  const saveTeams = map => {
-    const cur = S.settings();
-    const t = clone(cur.teams || {});
-    t[di] = map;
-    return save("settings", { ...cur, teams: t });
+    return `<li class="${isNow ? "now" : ""}">
+      <span class="t">${esc(it.t || "")}${it.e ? `<small>~${esc(it.e)}</small>` : ""}</span><span class="dt"></span>
+      <div class="x"><b>${esc(it.title)}</b>${tbdBadge(it.team)}${isNow ? '<span class="now-tag">지금</span>' : ""} ${pen("editItem", `data-i="${i}"`)}${it.desc ? `<p>${esc(it.desc)}</p>` : ""}</div></li>`;
   };
+  const am = list.filter(x => (x.it.t || "") < "12:00"), pm = list.filter(x => (x.it.t || "") >= "12:00");
+  const half = (name, arr) => `<div class="half"><div class="part">${name}</div>${arr.length ? `<ul class="tl">${arr.map(li).join("")}</ul>` : '<p class="mute">일정이 없어요.</p>'}</div>`;
 
-  page(ctx, html, {
+  const teamCard = ed() ? `
+    <div class="edit-card"><b>DAY ${di} 반별 팀 배정</b> ${pen("editTeams")} <button class="mini" data-act="teamPreset">1~3반 A · 4~6반 B 적용</button>
+      <div class="row" style="margin-top:8px">${CLASSES.map(c => `<span>${c}반 ${teams[c] ? teams[c] + "팀" : "미정"}</span>`).join(" · ")}</div></div>` : "";
+
+  page(ctx, `
+    <a class="back-link" href="#/schedule">← 전체 일정</a>
+    <div class="dayhd">
+      <span class="eyebrow" style="color:${DAY_LIGHT[(di - 1) % 3]}">DAY ${di} · ${esc(mmdd(day))} ${esc(wday(day))}</span>
+      <h2>${esc(dayTitle(day))} ${pen("editDay")}</h2>
+      ${day.tagline ? `<p>${esc(day.tagline)}</p>` : ""}
+      ${day.info ? `<p class="info">${esc(day.info)}</p>` : ""}
+    </div>
+    ${hasTeams ? `<div class="tabs2">${["A", "B"].map(k => `<a class="${team === k ? "on" : ""}" href="#/schedule/${di}/${k}">${k}팀</a>`).join("")}${myc && myTeam ? `<span class="mute my">내 반(${myc}반) ${myTeam}팀</span>` : ""}</div>` : ""}
+    ${teamCard}
+    <div class="halves">${half("오전", am)}${half("오후", pm)}</div>
+    ${addBtn("addItem", "일정 추가")}
+    ${resetBar("schedule")}`, {
     reset: d => doReset(d.id),
     editItem: d => openForm({
       title: "일정 수정", fields: ITEM_FIELDS, values: day.items[d.i],
       onSave: v => dayMut(x => { x.items[d.i] = v; }),
       onDelete: () => dayMut(x => { x.items.splice(d.i, 1); })
     }),
-    addItem: () => openForm({
-      title: "일정 추가", fields: ITEM_FIELDS, values: { team: "all" },
-      onSave: v => dayMut(x => { x.items.push(v); })
-    }),
-    editDay: () => openForm({
-      title: "이 날 정보 수정",
-      fields: [
-        { k: "label", label: "날짜 표시 (예: 11/18 (수))", req: true },
-        { k: "title", label: "제목", req: true },
-        { k: "info", label: "안내 문구", type: "textarea", rows: 3 }
-      ],
-      values: day,
-      onSave: v => dayMut(x => { Object.assign(x, v); })
-    }),
+    addItem: () => openForm({ title: "일정 추가", fields: ITEM_FIELDS, values: { team: "all" }, onSave: v => dayMut(x => { x.items.push(v); }) }),
+    editDay: () => openForm({ title: "이 날 정보 수정", fields: DAY_FIELDS, values: { ...day, title: dayTitle(day) }, onSave: v => dayMut(x => { Object.assign(x, v); }) }),
     editTeams: () => openForm({
       title: `DAY ${di} 팀 배정`,
       fields: CLASSES.map(c => ({ k: "c" + c, label: c + "반", type: "select", options: [["", "미정"], ["A", "A팀"], ["B", "B팀"]] })),
       values: Object.fromEntries(CLASSES.map(c => ["c" + c, teams[c] || ""])),
       onSave: v => { const m = {}; CLASSES.forEach(c => { if (v["c" + c]) m[c] = v["c" + c]; }); return saveTeams(m); }
     }),
-    teamPreset: () => {
-      if (!confirm("1~3반은 A팀, 4~6반은 B팀으로 지정할까요?")) return;
-      saveTeams({ 1: "A", 2: "A", 3: "A", 4: "B", 5: "B", 6: "B" });
-    }
+    teamPreset: () => { if (confirm("1~3반은 A팀, 4~6반은 B팀으로 지정할까요?")) saveTeams({ 1: "A", 2: "A", 3: "A", 4: "B", 5: "B", 6: "B" }); }
   });
+
+  function dayMut(fn) { return mut("schedule", a => fn(a[di - 1])); }
+  function saveTeams(map) {
+    const cur = S.settings();
+    const t = clone(cur.teams || {});
+    t[di] = map;
+    return save("settings", { ...cur, teams: t });
+  }
 }
 
 /* ---------- 이동 경로 ---------- */
