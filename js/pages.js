@@ -190,27 +190,36 @@ function scheduleDay(ctx, days, di) {
 
 /* ---------- 이동 경로 ---------- */
 const mapHtml = r => r.img
-  ? `<img src="${esc(r.img)}" alt="지도" loading="lazy">`
+  ? `<img class="map" src="${esc(r.img)}" alt="지도" loading="lazy">`
   : (r.fromQ && r.toQ
-    ? `<iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?saddr=${enc(r.fromQ)}&amp;daddr=${enc(r.toQ)}&amp;output=embed"></iframe>`
-    : '<div class="sub">지도가 아직 없어요.</div>');
+    ? `<iframe class="map" loading="lazy" title="지도" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?saddr=${enc(r.fromQ)}&amp;daddr=${enc(r.toQ)}&amp;output=embed"></iframe>`
+    : '<div class="mute">지도가 아직 없어요.</div>');
 const dirUrl = r => `https://www.google.com/maps/dir/?api=1&amp;origin=${enc(r.fromQ || "")}&amp;destination=${enc(r.toQ || "")}&amp;travelmode=driving`;
+const isLap = () => window.matchMedia("(min-width: 900px)").matches;
+// "A팀 · 전쟁 박물관 → 역사 박물관" → { team: "A팀", name: "전쟁 박물관 → 역사 박물관" }
+const splitTeam = t => { const m = String(t || "").match(/^([AB]팀)\s*·\s*(.*)$/); return m ? { team: m[1], name: m[2] } : { team: "", name: String(t || "") }; };
 
 export function pageRoute(ctx) {
   const days = S.get("schedule");
   const routes = S.get("routes");
-  const di = dayIndex(days, ctx.args[0]);
+  const today = days.findIndex(d => d.date === vnNow().date);
+  let di = parseInt(ctx.args[0], 10);
+  if (!(di >= 1 && di <= days.length)) di = today >= 0 ? today + 1 : 1;
   const list = routes.map((r, i) => ({ r, i })).filter(({ r }) => Number(r.day) === di);
+  const lap = isLap();
+  let sel = parseInt(ctx.args[1], 10);
+  if (!(sel >= 0 && sel < list.length)) sel = lap && list.length ? 0 : -1;
 
   const fields = [
     { k: "day", label: "날짜", type: "select", options: days.map((d, i) => [String(i + 1), `DAY ${i + 1} (${d.label})`]) },
-    { k: "title", label: "제목 (예: 공항 → 아리랑 식당)", req: true },
-    { k: "fromQ", label: "출발지 (구글맵 검색어 · 정확한 이름이나 주소)" },
-    { k: "toQ", label: "도착지 (구글맵 검색어)" },
+    { k: "dep", label: "출발 시간 (예: 08:00)" },
+    { k: "title", label: "제목 (예: 호텔 → 송빈 성당, A팀이면 'A팀 · ' 붙이기)", req: true },
+    { k: "fromQ", label: "출발지 (구글맵 검색어 또는 '위도,경도')" },
+    { k: "toQ", label: "도착지 (구글맵 검색어 또는 '위도,경도')" },
     { k: "time", label: "소요 시간 (예: 약 40분)" },
     { k: "dist", label: "거리 (예: 약 12km)" },
     { k: "note", label: "메모", type: "textarea", rows: 3 },
-    { k: "img", label: "지도 이미지 경로 (선택 · 예: assets/routes/day1.png)" },
+    { k: "img", label: "지도 이미지 경로 (선택)" },
     { k: "todo", label: "장소 확인 필요 표시", type: "check" }
   ];
   const fix = v => ({ ...v, day: Number(v.day) });
@@ -223,41 +232,55 @@ export function pageRoute(ctx) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
     save("routes", arr);
   };
+  const detail = r => `
+    ${mapHtml(r)}
+    <div class="kv"><div>소요 시간<b>${r.time ? esc(r.time) : "확인 중"}</b></div><div>거리<b>${r.dist ? esc(r.dist) : "확인 중"}</b></div></div>
+    ${r.note ? `<p class="note">${esc(r.note)}</p>` : ""}
+    <a class="lk" target="_blank" rel="noopener" href="${dirUrl(r)}">구글맵에서 길찾기 ${icon("out")}</a>`;
+  const editRow = i => ed() ? `<div class="row" style="margin-top:10px"><button class="edit" data-act="editRoute" data-i="${i}">수정</button><button class="mini" data-act="up" data-i="${i}">위로</button><button class="mini" data-act="down" data-i="${i}">아래로</button></div>` : "";
 
-  const cards = list.map(({ r, i }) => `
-    <details class="route" data-k="r${i}">
-      <summary>${esc(r.title)}${r.todo ? '<span class="badge b-todo">장소 확인 필요</span>' : ""}</summary>
-      <div class="route-body">
-        <div class="kv">⏱ 소요 시간: ${r.time ? esc(r.time) : "조사 중"}</div>
-        <div class="kv">📏 거리: ${r.dist ? esc(r.dist) : "조사 중"}</div>
-        ${r.note ? `<div class="kv">📝 ${esc(r.note)}</div>` : ""}
-        <div class="map-wrap">${mapHtml(r)}</div>
-        <a class="btn primary" target="_blank" rel="noopener" href="${dirUrl(r)}">구글맵에서 길찾기</a>
-        ${ed() ? `<div class="row" style="margin-top:10px"><button class="mini" data-act="editRoute" data-i="${i}">✏️ 수정</button><button class="mini" data-act="up" data-i="${i}">▲</button><button class="mini" data-act="down" data-i="${i}">▼</button></div>` : ""}
-      </div>
-    </details>`).join("");
+  const items = list.map(({ r, i }, k) => {
+    const { team, name } = splitTeam(r.title);
+    const small = [team, r.dep ? r.dep + " 출발" : ""].filter(Boolean).join(" · ");
+    const open = k === sel;
+    return `<div class="ri ${open ? "sel" : ""}">
+      <a href="#/route/${di}${open && !lap ? "" : "/" + k}">
+        <span class="no">${k + 1}</span>
+        <span class="nm">${small ? `<small>${esc(small)}</small>` : ""}<b>${esc(name)}</b>${ed() && r.todo ? ' <span class="badge b-todo">장소 확인 필요</span>' : ""}</span>
+        <span class="tm">${r.time ? esc(r.time) : "확인 중"}</span>
+      </a>
+      ${open && !lap ? `<div class="bd">${detail(r)}${editRow(i)}</div>` : ""}
+    </div>`;
+  }).join("");
+  const cur = sel >= 0 ? list[sel] : null;
+  const side = lap && cur ? (() => { const { team, name } = splitTeam(cur.r.title); return `
+    <div class="rview"><span class="eyebrow">${sel + 1}${team ? " · " + esc(team) : ""}${cur.r.dep ? " · " + esc(cur.r.dep) + " 출발" : ""}</span>
+      <h3>${esc(name)}</h3>${detail(cur.r)}${editRow(cur.i)}</div>`; })() : "";
 
-  const html = `
-    <h2>🗺️ 이동 경로</h2>
-    <div class="daybtns">${days.map((d, i) => `<a class="${i + 1 === di ? "on" : ""}" href="#/route/${i + 1}">${esc(d.label)}<br>DAY ${i + 1}</a>`).join("")}</div>
-    ${cards || '<div class="empty">이 날의 이동 경로가 아직 없어요.</div>'}
+  page(ctx, `
+    <div class="seg">${days.map((d, i) => `<a class="${i + 1 === di ? "on" : ""}" href="#/route/${i + 1}"><b>${i + 1}일차</b><small>${esc(mmdd(d))} ${esc(wday(d))}</small></a>`).join("")}</div>
+    <div class="rsplit">
+      <div class="rt">${items || '<div class="empty">이 날의 이동 경로가 아직 없어요.</div>'}</div>
+      ${side}
+    </div>
     ${addBtn("addRoute", "경로 추가")}
-    ${resetBar("routes")}`;
-
-  page(ctx, html, {
+    ${resetBar("routes")}`, {
     reset: d => doReset(d.id),
     editRoute: d => openForm({
       title: "경로 수정", fields, values: { ...routes[d.i], day: String(routes[d.i].day) },
       onSave: v => mut("routes", a => { a[d.i] = fix(v); }),
       onDelete: () => mut("routes", a => { a.splice(d.i, 1); })
     }),
-    addRoute: () => openForm({
-      title: "경로 추가", fields, values: { day: String(di) },
-      onSave: v => mut("routes", a => { a.push(fix(v)); })
-    }),
+    addRoute: () => openForm({ title: "경로 추가", fields, values: { day: String(di) }, onSave: v => mut("routes", a => { a.push(fix(v)); }) }),
     up: d => move(Number(d.i), -1),
     down: d => move(Number(d.i), 1)
   });
+
+  // 휴대폰 ↔ 노트북 폭이 바뀌면 다시 그림
+  const mq = window.matchMedia("(min-width: 900px)");
+  const re = () => pageRoute(ctx);
+  mq.addEventListener("change", re);
+  ctx.leave(() => mq.removeEventListener("change", re));
 }
 
 /* ---------- 공지 ---------- */

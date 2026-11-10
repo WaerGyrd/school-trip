@@ -181,3 +181,35 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
   .halves { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
   .dayhd h2 { font-size: 34px; }
 }
+
+/* ===== 이동 경로 ===== */
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1.5px solid var(--tx); border-radius: 12px; overflow: hidden; margin-top: 4px; }
+.seg a { padding: 8px 0; text-align: center; border-right: 1.5px solid var(--tx); line-height: 1.25; text-decoration: none; }
+.seg a:last-child { border: 0; }
+.seg b { display: block; font-family: "A2Z"; font-size: 16px; }
+.seg small { font-size: 12px; color: var(--mute); }
+.seg a.on { background: var(--tx); color: var(--ink); }
+.seg a.on small { color: #555; }
+.rt { border-top: 1.5px solid var(--tx); margin-top: 16px; }
+.ri { border-bottom: 1px solid var(--line); }
+.ri > a { display: flex; align-items: center; gap: 12px; padding: 14px 0; text-decoration: none; }
+.ri .no { font-family: "A2Z"; font-size: 13px; width: 26px; height: 26px; border: 1.5px solid var(--tx); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; }
+.ri.sel .no { background: var(--tx); color: var(--ink); }
+.ri .nm { flex: 1; min-width: 0; }
+.ri .nm small { display: block; font-size: 12px; color: var(--mute); }
+.ri .nm b { font-size: 16px; font-weight: 600; }
+.ri .tm { font-size: 13px; color: var(--mute); white-space: nowrap; }
+.ri .bd { margin: 0 0 16px 38px; }
+.map { width: 100%; aspect-ratio: 4 / 3; border: 0; border-radius: 10px; display: block; background: var(--surf); object-fit: cover; }
+.kv { display: flex; gap: 22px; margin: 10px 0 6px; font-size: 12px; color: var(--mute); }
+.kv b { display: block; font-family: "A2Z"; font-size: 17px; color: var(--tx); }
+.note { font-size: 13px; color: var(--mute); margin: 4px 0 8px; }
+.lk { font-size: 13px; border-bottom: 1.5px solid var(--tx); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+.lk svg.ic { width: 14px; height: 14px; }
+.rview { background: var(--surf); border: 1px solid var(--line); border-radius: 14px; padding: 22px; margin-top: 16px; }
+.rview h3 { font-size: 24px; margin: 2px 0 14px; }
+.rview .map { aspect-ratio: 16 / 9; }
+@media (min-width: 900px) {
+  .seg { max-width: 560px; }
+  .rsplit { display: grid; grid-template-columns: 400px 1fr; gap: 40px; align-items: start; }
+}
