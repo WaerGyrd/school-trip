@@ -134,3 +134,11 @@ export function compressImage(file, max = 900, quality = 0.8) {
     img.src = url;
   });
 }
+
+// 공지 시간: "26년 11월 18일 16:04" (베트남 시간 기준)
+export function fmtNoticeTime(ts) {
+  if (!ts || !ts.toDate) return "방금";
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Ho_Chi_Minh", year: "2-digit", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+    .formatToParts(ts.toDate()).map(x => [x.type, x.value]));
+  return `${p.year}년 ${p.month}월 ${p.day}일 ${p.hour}:${p.minute}`;
+}

@@ -2,30 +2,30 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>KISH 고1 수학여행 · 호치민</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#141922">
+  <title>KISH 10학년 수학여행 · 호치민</title>
   <link rel="icon" href="icon.svg">
+  <link rel="preload" href="assets/fonts/freesentation.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/a2z.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <header id="topbar">
-  <button id="menuBtn" aria-label="메뉴">☰</button>
-  <a class="brand" href="#/">KISH 호치민 수학여행</a>
-  <button id="bellBtn" aria-label="알림">🔔<span id="bellBadge" hidden>0</span></button>
+  <button id="menuBtn" aria-label="메뉴 열기"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span id="menuDot" class="dot" hidden></span></button>
+  <h1 id="topTitle"></h1>
+  <a id="topLogo" href="#/" aria-label="처음 화면"><img src="assets/logo.png" alt="KISH" onerror="this.remove()"></a>
 </header>
 
-<nav id="drawer">
-  <div class="drawer-title">KISH 고1 수학여행</div>
-  <a href="#/" data-nav="home">🏠 메인</a>
-  <a href="#/schedule" data-nav="schedule">📅 일정</a>
-  <a href="#/route" data-nav="route">🗺️ 이동 경로</a>
-  <a href="#/notice" data-nav="notice">📢 공지 사항</a>
-  <a href="#/learn" data-nav="learn">📚 배워 가기</a>
-  <a href="#/quiz" data-nav="quiz">❓ O/X 퀴즈</a>
-  <a href="#/photo" data-nav="photo">📸 포토존</a>
-  <a href="#/teachers" data-nav="teachers">💖 쌤 소개</a>
-  <hr>
+<nav id="drawer" aria-label="목차">
+  <div class="drawer-hd"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>목차</div>
+  <a href="#/schedule" data-nav="schedule"><small>01</small>일정</a>
+  <a href="#/route" data-nav="route"><small>02</small>이동 경로</a>
+  <a href="#/notice" data-nav="notice"><small>03</small>공지 사항<span class="dot" hidden></span></a>
+  <a href="#/learn" data-nav="learn"><small>04</small>배워가기</a>
+  <a href="#/photo" data-nav="photo"><small>05</small>포토존</a>
+  <a href="#/teachers" data-nav="teachers"><small>06</small>쌤 소개</a>
   <div id="drawerExtra"></div>
 </nav>
 <div id="scrim"></div>
@@ -33,7 +33,7 @@
 <main id="view"></main>
 
 <div id="adminbar" hidden>
-  <span id="adminText">✏️ 편집 모드</span>
+  <span id="adminText">편집 모드</span>
   <button id="adminToggle" class="mini">끄기</button>
 </div>
 
