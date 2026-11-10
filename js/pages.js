@@ -350,81 +350,88 @@ export function pageNotice(ctx) {
 const SPOT_FIELDS = [
   { k: "name", label: "이름", req: true },
   { k: "en", label: "영어 이름" },
+  { k: "when", label: "언제 가는지 (예: 3일차 · 호치민)" },
+  { k: "label", label: "주제 (예: 베트남 전쟁)" },
   { k: "img", label: "사진 경로 (예: assets/learn/war.jpg)" },
   { k: "summary", label: "한 줄 소개", type: "textarea", rows: 3 }
 ];
 const TOPIC_FIELDS = [
-  { k: "title", label: "제목", req: true },
-  { k: "body", label: "내용", type: "textarea", rows: 6 }
+  { k: "title", label: "질문", req: true },
+  { k: "body", label: "설명", type: "textarea", rows: 6 }
 ];
-const spotImg = s => s.img ? `<img class="spot-img" src="${esc(s.img)}" alt="" onerror="this.style.display='none'">` : "";
+const bgUrl = img => img ? `style="background-image:url('${esc(img)}')"` : "";
+const two = n => String(n).padStart(2, "0");
 
 export function pageLearn(ctx) {
   const spots = S.get("learn");
   const si = ctx.args[0] !== undefined ? parseInt(ctx.args[0], 10) : -1;
-
-  if (si >= 0 && spots[si]) {
-    const s = spots[si];
-    const topics = (s.topics || []).map((tp, k) => `
-      <details class="topic" data-k="t${k}" ${String(ctx.args[1]) === String(k) ? "open" : ""}>
-        <summary>${esc(tp.title)}</summary>
-        <p>${esc(tp.body)}</p>${pen("editTopic", `data-k="${k}"`)}
-      </details>`).join("");
-    const html = `
-      <p><a href="#/learn">← 목록으로</a></p>
-      <div class="card">
-        ${spotImg(s)}
-        <h3 style="margin:0">${esc(s.name)} <small class="sub">${esc(s.en || "")}</small> ${pen("editSpot", `data-i="${si}"`)}</h3>
-        <p>${esc(s.summary || "")}</p>
-        ${topics || '<div class="sub">내용을 준비 중이에요.</div>'}
-        ${addBtn("addTopic", "내용 추가")}
-      </div>
-      <div class="card"><b>❓ 다 읽었나요?</b><p class="sub">퀴즈로 확인해 봐요!</p><a class="btn primary" href="#/quiz">퀴즈 풀기</a></div>
-      ${resetBar("learn")}`;
-    return page(ctx, html, {
-      reset: d => doReset(d.id),
-      editSpot: d => openForm({
-        title: "장소 수정", fields: SPOT_FIELDS, values: s,
-        onSave: v => mut("learn", a => { a[d.i] = { ...a[d.i], ...v }; }),
-        onDelete: async () => { const ok = await mut("learn", a => { a.splice(d.i, 1); }); if (ok) location.hash = "#/learn"; return ok; }
-      }),
-      editTopic: d => openForm({
-        title: "내용 수정", fields: TOPIC_FIELDS, values: s.topics[d.k],
-        onSave: v => mut("learn", a => { a[si].topics[d.k] = v; }),
-        onDelete: () => mut("learn", a => { a[si].topics.splice(d.k, 1); })
-      }),
-      addTopic: () => openForm({
-        title: "내용 추가", fields: TOPIC_FIELDS,
-        onSave: v => mut("learn", a => { (a[si].topics = a[si].topics || []).push(v); })
-      })
-    });
-  }
+  if (si >= 0 && spots[si]) return learnDetail(ctx, spots, si);
 
   const cards = spots.map((s, i) => `
-    <div class="card">
-      ${spotImg(s)}
-      <h3 style="margin:0">${esc(s.name)} <small class="sub">${esc(s.en || "")}</small></h3>
-      <p>${esc(s.summary || "")}</p>
-      <div class="row"><a class="btn primary" href="#/learn/${i}">자세히 보기</a>${pen("editSpot", `data-i="${i}"`)}</div>
-    </div>`).join("");
-  const html = `
-    <h2>📚 배워 가기</h2>
-    ${cards || '<div class="empty">아직 내용이 없어요.</div>'}
+    <a class="lc" href="#/learn/${i}" ${bgUrl(s.img)}>${s.when ? `<small>${esc(s.when)}</small>` : ""}<b>${esc(s.name)}</b></a>`).join("");
+  const edits = ed() ? `<div class="edit-card">장소 수정: ${spots.map((s, i) => `<button class="edit" data-act="editSpot" data-i="${i}">${esc(s.name)}</button>`).join(" ")}</div>` : "";
+  page(ctx, `
+    <div class="lgrid">${cards}<a class="lc qz" href="#/quiz"><span class="oxm">O X</span><small>다 읽었으면</small><b>O &amp; X 퀴즈</b></a></div>
+    ${edits}
     ${addBtn("addSpot", "장소 추가")}
-    <div class="card"><b>❓ O/X 퀴즈</b><p class="sub">배운 내용을 퀴즈로 확인하고 랭킹에 도전해요!</p><a class="btn primary" href="#/quiz">퀴즈 풀기</a></div>
-    ${resetBar("learn")}`;
-  page(ctx, html, {
+    ${resetBar("learn")}`, {
     reset: d => doReset(d.id),
     editSpot: d => openForm({
       title: "장소 수정", fields: SPOT_FIELDS, values: spots[d.i],
       onSave: v => mut("learn", a => { a[d.i] = { ...a[d.i], ...v }; }),
       onDelete: () => mut("learn", a => { a.splice(d.i, 1); })
     }),
-    addSpot: () => openForm({
-      title: "장소 추가", fields: SPOT_FIELDS,
-      onSave: v => mut("learn", a => { a.push({ ...v, topics: [] }); })
-    })
+    addSpot: () => openForm({ title: "장소 추가", fields: SPOT_FIELDS, onSave: v => mut("learn", a => { a.push({ ...v, topics: [] }); }) })
   });
+}
+
+function learnDetail(ctx, spots, si) {
+  ctx.setTop({ variant: "overlay" });
+  const s = spots[si];
+  const topics = s.topics || [];
+  const lap = isLap();
+  let k = parseInt(ctx.args[1], 10);
+  if (!(k >= 0 && k < topics.length)) k = lap && topics.length ? 0 : -1;
+  const where = /박물관/.test(s.name) ? "박물관" : s.name;
+  const lead = `${s.label ? esc(s.label) + ", " : ""}${esc(where)} 가기 전 딱 ${topics.length}가지만 알자!`;
+  const exp = j => `
+    <div class="exp paper"><a class="back" href="#/learn/${si}" aria-label="닫기">${icon("back")}</a>
+      <span class="k">${two(j + 1)}</span><h3>${esc(topics[j].title)}</h3><p>${esc(topics[j].body)}</p>
+      ${ed() ? `<div class="row end">${pen("editTopic", `data-k="${j}"`)}</div>` : ""}</div>`;
+  const pills = topics.map((tp, j) => j === k && !lap ? exp(j)
+    : `<a class="pill ${j === k ? "on" : ""}" href="#/learn/${si}/${j}"><span><small>${two(j + 1)}</small>${esc(tp.title)}</span>${icon("right")}</a>`).join("");
+
+  ctx.view.innerHTML = `
+    <section class="place" ${bgUrl(s.img)}>
+      <div class="page pcols">
+        <div>
+          ${s.when ? `<span class="eyebrow">${esc(s.when)}</span>` : ""}
+          <h1 class="pt">${esc(s.name)} ${pen("editSpot")}</h1>
+          <p class="lead2">${lead}</p>
+          <div class="pills">${pills || '<p class="mute">내용을 준비 중이에요.</p>'}</div>
+          ${addBtn("addTopic", "질문 추가")}
+          <a class="btn quiz-go" href="#/quiz">퀴즈 풀러 가기</a>
+        </div>
+        ${lap && k >= 0 ? exp(k) : ""}
+      </div>
+    </section>`;
+  bind(ctx, {
+    editSpot: () => openForm({
+      title: "장소 수정", fields: SPOT_FIELDS, values: s,
+      onSave: v => mut("learn", a => { a[si] = { ...a[si], ...v }; }),
+      onDelete: async () => { const ok = await mut("learn", a => { a.splice(si, 1); }); if (ok) location.hash = "#/learn"; return ok; }
+    }),
+    editTopic: d => openForm({
+      title: "내용 수정", fields: TOPIC_FIELDS, values: topics[d.k],
+      onSave: v => mut("learn", a => { a[si].topics[d.k] = v; }),
+      onDelete: () => mut("learn", a => { a[si].topics.splice(d.k, 1); })
+    }),
+    addTopic: () => openForm({ title: "질문 추가", fields: TOPIC_FIELDS, onSave: v => mut("learn", a => { (a[si].topics = a[si].topics || []).push(v); }) })
+  });
+  const mq = window.matchMedia("(min-width: 900px)");
+  const re = () => learnDetail(ctx, S.get("learn"), si);
+  mq.addEventListener("change", re);
+  ctx.leave(() => mq.removeEventListener("change", re));
 }
 
 /* ---------- O/X 퀴즈 ---------- */
