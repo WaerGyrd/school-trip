@@ -8,7 +8,7 @@
   <link rel="icon" href="icon.svg">
   <link rel="preload" href="assets/fonts/freesentation.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/a2z.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=20261110b">
+  <link rel="stylesheet" href="css/style.css?v=20261110d">
 </head>
 <body>
 
@@ -33,13 +33,13 @@
 <main id="view"></main>
 
 <div id="adminbar" hidden>
-  <span id="adminText">편집 모드</span>
-  <button id="adminToggle" class="mini">끄기</button>
+  <span id="adminText">편집 모드 켜짐</span>
+  <button id="adminToggle" class="switch" role="switch" aria-checked="true" aria-label="편집 모드 끄기"></button>
 </div>
 
 <div id="toasts"></div>
 <div id="modal" hidden><div id="modalBox" class="modal-box"></div></div>
 
-<script type="module" src="js/app.js?v=20261110b"></script>
+<script type="module" src="js/app.js?v=20261110d"></script>
 </body>
 </html>

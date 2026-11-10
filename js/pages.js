@@ -1,8 +1,8 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261110b";
-import { DEFAULTS, CITY_INTRO } from "./data.js?v=20261110b";
-import * as S from "./store.js?v=20261110b";
-import { icon } from "./icons.js?v=20261110b";
-import { pickRound } from "./quiz.js?v=20261110b";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261110d";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS } from "./data.js?v=20261110d";
+import * as S from "./store.js?v=20261110d";
+import { icon } from "./icons.js?v=20261110d";
+import { pickRound } from "./quiz.js?v=20261110d";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -69,6 +69,7 @@ export function pageHome(ctx) {
       <img class="wm" src="assets/kish-wordmark.png" alt="KISH 10학년 수학여행" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'wm wm-txt',textContent:'KISH 10학년 수학여행'}))">
       <div class="hcm ${typing ? "typing" : ""}" aria-label="Ho Chi Minh City">${line("Ho Chi")}<br>${line("Minh City")}</div>
       <div class="bub"><img src="assets/logo.png" alt="" onerror="this.remove()"><p>${esc(CITY_INTRO)}</p></div>
+      <div class="edit-switch" hidden><span>편집 모드</span><button class="switch" role="switch" aria-checked="false" aria-label="편집 모드" data-toggle-edit></button></div>
       <div class="dev">개발자: 10229 조수민, 10524 이동선</div>
     </section>`;
 }
@@ -290,21 +291,26 @@ export function pageRoute(ctx) {
 /* ---------- 공지 ---------- */
 function noticeForm(n) {
   const t = S.state.teacher;
-  const opts = [["0", "공통 (전체)"]];
-  if (t.classNo === 0) CLASSES.forEach(c => opts.push([String(c), c + "반"]));
-  else if (t.classNo >= 1) opts.push([String(t.classNo), t.classNo + "반"]);
+  // 선생님이면 누구나 공통·모든 반에 쓸 수 있음
+  const opts = [["0", "공통 (전체)"], ...CLASSES.map(c => [String(c), c + "반"])];
+  // 작성자: 10학년부 선생님 7명 중에서 고름 (로그인한 선생님이 목록에 있으면 그 이름이 기본)
+  const names = NOTICE_AUTHORS;
+  const me = names.includes(t.name) ? t.name : names[0];
   openForm({
     title: n ? "공지 수정" : "새 공지",
     fields: [
       { k: "cls", label: "받는 곳", type: "select", options: opts },
+      { k: "signedAs", label: "작성자", type: "select", options: names.map(x => [x, x + " 선생님"]) },
       { k: "title", label: "제목", req: true },
       { k: "body", label: "내용", type: "textarea", rows: 6, req: true },
       { k: "pinned", label: "맨 위에 고정 (긴급 연락처 등)", type: "check" }
     ],
-    values: n ? { cls: String(n.cls), title: n.title, body: n.body, pinned: !!n.pinned } : { cls: String(t.classNo >= 1 ? t.classNo : 0) },
+    values: n
+      ? { cls: String(n.cls), signedAs: names.includes(n.signedAs) ? n.signedAs : me, title: n.title, body: n.body, pinned: !!n.pinned }
+      : { cls: String(t.classNo >= 1 ? t.classNo : 0), signedAs: me },
     onSave: async v => {
       try {
-        const data = { cls: Number(v.cls), title: v.title, body: v.body, pinned: !!v.pinned };
+        const data = { cls: Number(v.cls), signedAs: v.signedAs, title: v.title, body: v.body, pinned: !!v.pinned };
         if (n) await S.updateNotice(n.id, data); else await S.addNotice(data);
         toast(n ? "공지를 수정했어요" : "공지를 올렸어요", 2000);
         return true;
@@ -323,7 +329,7 @@ export function pageNotice(ctx) {
   const tabs = [["common", "공통"], ...CLASSES.map(c => [String(c), c + "반"])];
   const canEdit = n => t && (n.authorUid === t.uid || t.classNo === 0);
   const heading = f === "all" ? "최근 공지 사항" : f === "common" ? "공통 공지사항" : `10-${f} 공지사항`;
-  const who = n => n.cls === 0 ? `${n.authorName || ""} 선생님` : `${n.cls}반 ${n.authorName || ""} 선생님`;
+  const who = n => { const nm = n.signedAs || n.authorName || ""; return n.cls === 0 ? `${nm} 선생님` : `${n.cls}반 ${nm} 선생님`; };
 
   const cards = list.map(n => `
     <article class="ntc paper ${n.pinned ? "pin" : ""}">
