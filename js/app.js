@@ -11,9 +11,19 @@ const DEPS = {
   home: ["settings", "auth"], schedule: ["schedule", "settings", "auth"], route: ["routes", "schedule", "auth"],
   notice: ["notice", "auth"], learn: ["learn", "auth"], quiz: ["quiz", "auth"], photo: ["auth"], teachers: ["teachers", "auth"]
 };
+const TITLES = { schedule: "수학여행 일정", route: "이동 경로", notice: "공지 사항", learn: "배워 가기", quiz: "O & X 퀴즈", photo: "포토존", teachers: "쌤 소개" };
 const LABELS = { schedule: "일정", routes: "이동 경로", learn: "배워 가기", quiz: "퀴즈", teachers: "쌤 소개", settings: "메인 소개·팀 배정" };
 
 const view = $("#view");
+let unread = 0;
+
+/* ---------- 상단 바 ---------- */
+// variant: plain(제목+로고) / overlay(사진 위, 햄버거만) / bare(제목 없이 로고만)
+export function setTop({ title = "", variant = "plain" } = {}) {
+  const bar = $("#topbar");
+  bar.className = "tb-" + variant;
+  $("#topTitle").textContent = title;
+}
 const leaves = [];
 let cur = "home";
 let ready = false;
@@ -35,7 +45,9 @@ function render(nav) {
   document.body.classList.remove("menu-open");
   $$("#drawer [data-nav]").forEach(a => a.classList.toggle("on", a.dataset.nav === cur));
 
-  const ctx = { view, args: parts.slice(1), nav: !!nav, leave: f => leaves.push(f) };
+  setTop({ title: TITLES[cur] || "", variant: cur === "home" ? "overlay" : "plain" });
+  if (cur === "notice") { unread = 0; setBadge(); }
+  const ctx = { view, args: parts.slice(1), nav: !!nav, leave: f => leaves.push(f), setTop };
   view.onclick = null;
   try { PAGES[cur](ctx); }
   catch (e) {
@@ -74,12 +86,12 @@ function drawerExtra() {
     <label class="dx">내 반
       <select id="dxClass"><option value="0">선택 안 함</option>${[1, 2, 3, 4, 5, 6].map(c => `<option value="${c}" ${c === my ? "selected" : ""}>${c}반</option>`).join("")}</select>
     </label>
-    <label class="dx chk"><input type="checkbox" id="dxAlert" ${ls.get("alert", true) ? "checked" : ""}> 🔔 알림 소리·진동</label>
+    <label class="dx chk"><input type="checkbox" id="dxAlert" ${ls.get("alert", true) ? "checked" : ""}> 새 공지 알림 소리·진동</label>
     <label class="dx chk"><input type="checkbox" id="dxMine" ${ls.get("onlymine", false) ? "checked" : ""}> 내 반 + 공통 공지만 알림</label>
     <hr>
     ${t ? `
-      <div class="dx-user">👩‍🏫 ${esc(t.name)} ${who}</div>
-      <button class="btn ghost" id="dxEdit">${S.state.editMode ? "✏️ 편집 모드 끄기" : "✏️ 편집 모드 켜기"}</button>
+      <div class="dx-user">${esc(t.name)} 선생님 ${who}</div>
+      <button class="btn ghost" id="dxEdit">${S.state.editMode ? "편집 모드 끄기" : "편집 모드 켜기"}</button>
       <button class="btn ghost" id="dxOut">로그아웃</button>`
     : u ? `
       <div class="banner-warn">로그인은 됐지만 교사로 등록되지 않았어요. (Firestore의 teachers 문서를 확인하세요)</div>
@@ -104,7 +116,7 @@ function drawerExtra() {
     try {
       await S.login($("#dxEmail").value.trim(), $("#dxPw").value);
       document.body.classList.remove("menu-open");
-      toast("로그인했어요 👋", 2000);
+      toast("로그인했어요", 2000);
     } catch (err) {
       alert("로그인하지 못했어요. 아이디와 비밀번호를 확인해 주세요.\n(" + (err.code || err.message) + ")");
     }
@@ -115,19 +127,18 @@ function adminBar() {
   const t = S.state.teacher;
   $("#adminbar").hidden = !t;
   if (t) {
-    $("#adminText").textContent = S.state.editMode ? `✏️ 편집 모드 · ${t.name}` : `편집 모드 꺼짐 · ${t.name}`;
+    $("#adminText").textContent = S.state.editMode ? `편집 모드 · ${t.name}` : `편집 모드 꺼짐 · ${t.name}`;
     $("#adminToggle").textContent = S.state.editMode ? "끄기" : "켜기";
   }
 }
 $("#adminToggle").onclick = () => S.setEditMode(!S.state.editMode);
 
 /* ---------- 알림 (사이트가 열려 있을 때) ---------- */
-let unread = 0, flashT = null;
+let flashT = null;
 const baseTitle = document.title;
 function setBadge() {
-  const b = $("#bellBadge");
-  b.hidden = unread <= 0;
-  b.textContent = unread > 99 ? "99+" : unread;
+  $("#menuDot").hidden = unread <= 0;
+  $('#drawer [data-nav="notice"] .dot').hidden = unread <= 0;
 }
 function flash(msg) {
   if (!document.hidden) return;
@@ -138,25 +149,20 @@ function flash(msg) {
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) { clearInterval(flashT); document.title = baseTitle; }
 });
-$("#bellBtn").onclick = () => {
-  unread = 0; setBadge();
-  if (location.hash === "#/notice" || location.hash.startsWith("#/notice/")) render(false);
-  else location.hash = "#/notice";
-};
 
 S.on("notice", n => {
   const my = ls.get("myclass", 0);
   if (ls.get("onlymine", false) && my && n.cls !== 0 && n.cls !== my) return;
-  unread++; setBadge();
-  toast("📢 새 공지: " + n.title, 6000);
+  if (cur !== "notice") { unread++; setBadge(); }
+  toast("새 공지: " + n.title, 6000);
   if (ls.get("alert", true)) {
     beep();
     try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) {}
   }
-  flash("📢 새 공지가 있어요!");
+  flash("새 공지가 있어요!");
 });
 S.on("content", ({ id, by }) => {
-  toast(`📝 ${LABELS[id] || id}이(가) 업데이트되었어요${by ? " (" + by + ")" : ""}`, 4000);
+  toast(`${LABELS[id] || id}이(가) 업데이트되었어요${by ? " (" + by + ")" : ""}`, 4000);
 });
 
 /* ---------- 데이터가 바뀌면 화면 갱신 ---------- */
