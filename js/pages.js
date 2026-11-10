@@ -1,6 +1,7 @@
 import { $, esc, hashNum, ls, toast, vnNow, fmtTime, fmtNoticeTime, openForm, openModal, closeModal, compressImage } from "./util.js";
 import * as S from "./store.js";
 import { icon } from "./icons.js";
+import { pickRound } from "./quiz.js";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -437,8 +438,9 @@ function learnDetail(ctx, spots, si) {
 /* ---------- O/X 퀴즈 ---------- */
 let run = null;
 let scores = [];
-const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const PLACE_NAME = { palace: "통일궁", war: "전쟁 박물관", history: "역사 박물관" };
 const QUIZ_FIELDS = [
+  { k: "place", label: "장소", type: "select", options: [["palace", "통일궁"], ["war", "전쟁 박물관"], ["history", "역사 박물관"]] },
   { k: "q", label: "문제", type: "textarea", rows: 3, req: true },
   { k: "a", label: "정답", type: "select", options: [["true", "O (맞다)"], ["false", "X (틀리다)"]] },
   { k: "exp", label: "해설", type: "textarea", rows: 3 }
@@ -451,52 +453,54 @@ export function pageQuiz(ctx) {
   const rankHtml = () => !S.configured
     ? '<div class="empty">Firebase 연결 후 랭킹이 보여요.</div>'
     : scores.length
-      ? `<ol class="rank">${scores.map((s, i) => `<li><span class="no">${["🥇", "🥈", "🥉"][i] || i + 1}</span><span class="nm">${esc(s.cls)}반 ${esc(s.name)}</span><span class="sc">${s.score}/${s.total}</span>${S.isTeacher() ? `<button class="mini danger" data-act="delScore" data-id="${s.id}">✕</button>` : ""}</li>`).join("")}</ol>`
+      ? `<ol class="rank">${scores.map((s, i) => `<li><span>${i + 1}</span><span>${esc(s.cls)}반 ${esc(s.name)}</span><span class="sc">${s.score}/${s.total}</span>${S.isTeacher() ? `<button class="mini danger" data-act="delScore" data-id="${s.id}">삭제</button>` : ""}</li>`).join("")}</ol>`
       : '<div class="empty">아직 기록이 없어요. 첫 도전자가 되어 보세요!</div>';
 
   const qHtml = () => {
-    if (!qs.length) return '<div class="card empty">퀴즈 문제가 아직 없어요.</div>';
-    if (!run) return `<div class="card qbox"><h3>❓ O/X 퀴즈</h3><p>모두 ${qs.length}문제! 맞힌 개수로 랭킹이 정해져요.</p><button class="btn primary" data-act="start">시작하기</button></div>`;
+    if (!qs.length) return '<div class="qcard paper empty">퀴즈 문제가 아직 없어요.</div>';
+    if (!run) return `<div class="qcard paper qstart"><span class="k">배워가기 복습</span><h3>O &amp; X 퀴즈</h3><p>문제 ${qs.length}개 중에서 10문제가 무작위로 나와요. 맞힌 개수로 랭킹이 정해져요.</p><button class="btn primary" data-act="start">시작하기</button></div>`;
     if (run.i < run.qs.length) {
       const q = run.qs[run.i];
       const last = run.i === run.qs.length - 1;
-      return `<div class="card qbox">
-        <div class="progress"><i style="width:${(run.i / run.qs.length) * 100}%"></i></div>
-        <div class="sub">${run.i + 1} / ${run.qs.length}</div>
-        <div class="qtext">${esc(q.q)}</div>
+      return `<div class="qcard paper">
+        <div class="prog"><i style="width:${(run.i / run.qs.length) * 100}%"></i></div>
+        <div class="qn">${run.i + 1} / ${run.qs.length}${PLACE_NAME[q.place] ? ` · ${PLACE_NAME[q.place]}` : ""}</div>
+        <div class="qt">${esc(q.q)}</div>
         ${run.ans === null
-          ? '<div class="ox"><button class="o" data-act="ans" data-v="1">O</button><button class="x" data-act="ans" data-v="0">X</button></div>'
-          : `<div class="fb ${run.ok ? "ok" : "no"}">${run.ok ? "정답! 🎉" : "아쉬워요 😢"}</div><p>${esc(q.exp || "")}</p><button class="btn primary" data-act="next">${last ? "결과 보기" : "다음 문제"}</button>`}
+          ? '<div class="ox"><button data-act="ans" data-v="1">O</button><button data-act="ans" data-v="0">X</button></div>'
+          : `<div class="fb ${run.ok ? "ok" : "no"}">${run.ok ? "정답이에요" : "아쉬워요"} · 정답 ${q.a ? "O" : "X"}</div><p class="qexp">${esc(q.exp || "")}</p><button class="btn primary" data-act="next">${last ? "결과 보기" : "다음 문제"}</button>`}
       </div>`;
     }
     const my = ls.get("myclass", 0) || 1;
-    return `<div class="card qbox"><h3>결과</h3>
-      <div class="qtext">${run.score} / ${run.qs.length} 점</div>
-      ${run.saved ? '<p class="fb ok">랭킹에 등록했어요! 🏆</p>' : `
+    return `<div class="qcard paper qstart"><span class="k">결과</span>
+      <div class="qscore">${run.score} / ${run.qs.length}</div>
+      ${run.saved ? '<p class="fb ok">랭킹에 등록했어요!</p>' : `
         <p>이름을 적고 랭킹에 등록해 보세요.</p>
-        <div class="row" style="justify-content:center">
-          <select id="qcls" style="padding:9px;border-radius:10px;border:1px solid #ddd">${CLASSES.map(c => `<option value="${c}" ${c === my ? "selected" : ""}>${c}반</option>`).join("")}</select>
-          <input id="qname" maxlength="12" placeholder="이름" style="padding:9px;border-radius:10px;border:1px solid #ddd;width:140px">
-        </div>
-        <div style="margin-top:10px"><button class="btn primary" data-act="saveScore">랭킹 등록</button></div>`}
+        <div class="row">
+          <select id="qcls">${CLASSES.map(c => `<option value="${c}" ${c === my ? "selected" : ""}>${c}반</option>`).join("")}</select>
+          <input id="qname" maxlength="12" placeholder="이름">
+          <button class="btn primary" data-act="saveScore">등록</button>
+        </div>`}
+      <button class="btn ghost" data-act="start" style="margin-top:12px">다시 풀기</button>
     </div>`;
   };
   const drawQ = () => { const el = $("#qarea"); if (el) el.innerHTML = qHtml(); };
 
   const editCard = ed() ? `
-    <div class="card"><h3>퀴즈 문제 편집</h3>
-      ${qs.map((q, i) => `<div class="qrow"><span>${i + 1}. ${esc(q.q)} <b>${q.a ? "O" : "X"}</b></span><button class="mini" data-act="editQ" data-i="${i}">✏️</button></div>`).join("")}
+    <div class="edit-card"><b>퀴즈 문제 편집 (${qs.length}개)</b>
+      ${qs.map((q, i) => `<div class="qrow"><span>${i + 1}. [${PLACE_NAME[q.place] || "-"}] ${esc(q.q)} <b>${q.a ? "O" : "X"}</b></span><button class="edit" data-act="editQ" data-i="${i}">수정</button></div>`).join("")}
       ${addBtn("addQ", "문제 추가")}
     </div>${resetBar("quiz")}` : "";
 
   page(ctx, `
-    <h2>❓ O/X 퀴즈</h2>
     ${offlineBanner()}
-    <div id="qarea"></div>
-    <div class="card"><h3 style="margin-top:0">🏆 랭킹 TOP 20</h3><div id="rank">${rankHtml()}</div></div>
+    <div class="qcols">
+      <div id="qarea"></div>
+      <div class="rankbox"><div class="stitle">랭킹</div><div id="rank">${rankHtml()}</div></div>
+    </div>
     ${editCard}`, {
     reset: d => doReset(d.id),
-    start: () => { run = { qs: shuffle(qs), i: 0, score: 0, ans: null, ok: false, saved: false }; drawQ(); },
+    start: () => { run = { qs: pickRound(qs), i: 0, score: 0, ans: null, ok: false, saved: false }; drawQ(); },
     ans: d => {
       if (!run || run.ans !== null) return;
       const q = run.qs[run.i];
@@ -511,18 +515,18 @@ export function pageQuiz(ctx) {
       if (!name) return alert("이름을 적어 주세요.");
       try {
         await S.addScore({ name, cls: Number($("#qcls").value), score: run.score, total: run.qs.length });
-        run.saved = true; drawQ(); toast("랭킹에 등록했어요 🏆", 2000);
+        run.saved = true; drawQ(); toast("랭킹에 등록했어요", 2000);
       } catch (e) { alert("등록하지 못했어요.\n" + (e.message || e)); }
     },
     delScore: async d => { if (confirm("이 기록을 삭제할까요?")) { try { await S.deleteScore(d.id); } catch (e) { alert(e.message || e); } } },
     editQ: d => openForm({
-      title: "문제 수정", fields: QUIZ_FIELDS, values: { q: qs[d.i].q, a: String(qs[d.i].a), exp: qs[d.i].exp || "" },
-      onSave: v => mut("quiz", a => { a[d.i] = { q: v.q, a: v.a === "true", exp: v.exp }; }),
+      title: "문제 수정", fields: QUIZ_FIELDS, values: { place: qs[d.i].place || "palace", q: qs[d.i].q, a: String(qs[d.i].a), exp: qs[d.i].exp || "" },
+      onSave: v => mut("quiz", a => { a[d.i] = { place: v.place, q: v.q, a: v.a === "true", exp: v.exp }; }),
       onDelete: () => mut("quiz", a => { a.splice(d.i, 1); })
     }),
     addQ: () => openForm({
-      title: "문제 추가", fields: QUIZ_FIELDS, values: { a: "true" },
-      onSave: v => mut("quiz", a => { a.push({ q: v.q, a: v.a === "true", exp: v.exp }); })
+      title: "문제 추가", fields: QUIZ_FIELDS, values: { a: "true", place: "palace" },
+      onSave: v => mut("quiz", a => { a.push({ place: v.place, q: v.q, a: v.a === "true", exp: v.exp }); })
     })
   });
 

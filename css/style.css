@@ -269,3 +269,37 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
   .pcols { display: grid; grid-template-columns: 440px 1fr; gap: 60px; align-items: start; }
   .pcols > .exp { margin-top: 120px; }
 }
+
+/* ===== 퀴즈 ===== */
+.qcard { padding: 20px; margin-top: 8px; }
+.qstart h3 { font-size: 24px; margin: 4px 0 8px; }
+.qstart p { color: var(--pmute); font-size: 14px; }
+.qcard .k { font-size: 12px; letter-spacing: 1.5px; color: var(--pmute); }
+.qcard .btn { border-color: var(--ink); color: var(--ink); }
+.qcard .btn.primary { background: var(--ink); color: #fff; }
+.qcard .btn.ghost { border-color: var(--pline); color: var(--pmute); }
+.qcard select, .qcard input { padding: 9px 10px; border: 1px solid #ccc; border-radius: 10px; }
+.qcard input { width: 120px; }
+.prog { height: 3px; background: #e5e5e5; }
+.prog i { display: block; height: 100%; background: var(--ink); }
+.qn { font-size: 12px; color: var(--pmute); margin-top: 8px; letter-spacing: 1px; }
+.qt { font-family: "A2Z"; font-size: 21px; line-height: 1.45; margin: 10px 0 20px; }
+.ox { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ox button { height: 110px; border: 2px solid var(--ink); background: #fff; color: var(--ink); border-radius: 12px; font-family: "A2Z"; font-size: 56px; }
+.ox button:active { background: var(--ink); color: #fff; }
+.fb { font-family: "A2Z"; font-size: 18px; margin: 4px 0; }
+.fb.ok { color: var(--d1); } .fb.no { color: var(--c36); }
+.qexp { font-size: 14.5px; margin: 6px 0 16px; }
+.qscore { font-family: "A2Z"; font-size: 44px; margin: 6px 0; }
+.rank { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--tx); }
+.rank li { display: grid; grid-template-columns: 34px 1fr auto auto; gap: 8px; align-items: center; padding: 11px 2px; border-bottom: 1px solid var(--line); font-size: 15px; }
+.rank li span:first-child { font-family: "A2Z"; }
+.rank li:nth-child(-n+3) { font-weight: 700; }
+.rank li:nth-child(-n+3) .sc { color: var(--d3l); }
+.rankbox .stitle { margin-top: 26px; }
+.qrow { display: flex; gap: 8px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.qrow span { flex: 1; }
+@media (min-width: 900px) {
+  .qcols { display: grid; grid-template-columns: 1.2fr 1fr; gap: 50px; align-items: start; }
+  .rankbox .stitle { margin-top: 8px; }
+}
