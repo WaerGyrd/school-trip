@@ -1,6 +1,6 @@
-import { $, $$, esc, ls, toast, beep } from "./util.js?v=20261110b";
-import * as S from "./store.js?v=20261110b";
-import * as P from "./pages.js?v=20261110b";
+import { $, $$, esc, ls, toast, beep } from "./util.js?v=20261110c";
+import * as S from "./store.js?v=20261110c";
+import * as P from "./pages.js?v=20261110c";
 
 const PAGES = {
   home: P.pageHome, schedule: P.pageSchedule, route: P.pageRoute, notice: P.pageNotice,
@@ -55,6 +55,7 @@ function render(nav) {
     view.innerHTML = `<div class="page"><div class="banner-warn">화면을 그리다 문제가 생겼어요.<br>${esc(e.message || e)}</div></div>`;
   }
   opened.forEach(k => { const d = view.querySelector(`details[data-k="${k}"]`); if (d) d.open = true; });
+  syncEditSwitch();
   window.scrollTo(0, nav ? 0 : y);
 }
 
@@ -93,7 +94,7 @@ function drawerExtra() {
     <hr>
     ${t ? `
       <div class="dx-user">${esc(t.name)} 선생님 ${who}</div>
-      <button class="btn ghost" id="dxEdit">${S.state.editMode ? "편집 모드 끄기" : "편집 모드 켜기"}</button>
+      <label class="dx chk sw-row">편집 모드 <button class="switch" role="switch" aria-checked="${S.state.editMode}" aria-label="편집 모드" data-toggle-edit></button></label>
       <button class="btn ghost" id="dxOut">로그아웃</button>`
     : u ? `
       <div class="banner-warn">로그인은 됐지만 교사로 등록되지 않았어요. (Firestore의 teachers 문서를 확인하세요)</div>
@@ -110,7 +111,6 @@ function drawerExtra() {
   $("#dxClass").onchange = e => { ls.set("myclass", Number(e.target.value)); refresh(); };
   $("#dxAlert").onchange = e => ls.set("alert", e.target.checked);
   $("#dxMine").onchange = e => ls.set("onlymine", e.target.checked);
-  const edBtn = $("#dxEdit"); if (edBtn) edBtn.onclick = () => S.setEditMode(!S.state.editMode);
   const outBtn = $("#dxOut"); if (outBtn) outBtn.onclick = () => { S.logout(); toast("로그아웃했어요", 2000); };
   const form = $("#dxLogin");
   if (form) form.onsubmit = async e => {
@@ -127,13 +127,27 @@ function drawerExtra() {
 
 function adminBar() {
   const t = S.state.teacher;
-  $("#adminbar").hidden = !t;
-  if (t) {
-    $("#adminText").textContent = S.state.editMode ? `편집 모드 · ${t.name}` : `편집 모드 꺼짐 · ${t.name}`;
-    $("#adminToggle").textContent = S.state.editMode ? "끄기" : "켜기";
-  }
+  $("#adminbar").hidden = !(t && S.state.editMode);   // 편집 모드가 켜져 있을 때만 아래 띠 표시
+  document.body.classList.toggle("editing", !!(t && S.state.editMode));
+  if (t) $("#adminText").textContent = `편집 모드 켜짐 · ${t.name} 선생님`;
 }
-$("#adminToggle").onclick = () => S.setEditMode(!S.state.editMode);
+
+/* ---------- 편집 모드 스위치 (홈·메뉴·아래 띠) ---------- */
+const wantEdit = () => ls.get("editmode", false);   // 기본은 꺼짐, 마지막 선택을 기억
+function toggleEdit() {
+  const v = !S.state.editMode;
+  ls.set("editmode", v);
+  S.setEditMode(v);
+}
+function syncEditSwitch() {
+  const t = !!S.state.teacher;
+  $$(".edit-switch").forEach(el => { el.hidden = !t; });
+  $$("[data-toggle-edit]").forEach(b => b.setAttribute("aria-checked", String(!!S.state.editMode)));
+}
+document.addEventListener("click", e => {
+  if (e.target.closest("[data-toggle-edit]")) { e.preventDefault(); toggleEdit(); }
+});
+$("#adminToggle").onclick = toggleEdit;
 
 /* ---------- 알림 (사이트가 열려 있을 때) ---------- */
 let flashT = null;
@@ -173,7 +187,9 @@ S.on("data", ev => {
   if ((DEPS[cur] || []).includes(key)) refresh();
 });
 S.on("auth", () => {
-  drawerExtra(); adminBar();
+  // store.js 는 로그인하면 편집 모드를 켜므로, 저장된 선택(기본 꺼짐)으로 맞춘다
+  if (S.state.teacher && S.state.editMode !== wantEdit()) { S.setEditMode(wantEdit()); return; }
+  drawerExtra(); adminBar(); syncEditSwitch();
   if (S.state.user && !S.state.teacher) toast("로그인은 됐지만 교사로 등록되지 않은 계정이에요.", 7000);
 });
 S.on("ready", () => { ready = true; render(true); });

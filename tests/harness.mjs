@@ -36,7 +36,8 @@ export async function openPage({ width = 390, height = 844, hash = "#/", fake = 
     route.fulfill({ contentType: "text/javascript", body: fs.readFileSync(path.join(STUBS, name), "utf8") });
   });
   page.on("pageerror", e => console.error("[pageerror]", e.message));
-  await page.addInitScript(f => { window.__FAKE = f; }, fake);
+  // 선생님 테스트는 기본으로 편집 모드를 켜 둔다 (fake.edit === false 면 기본값 그대로 꺼짐)
+  await page.addInitScript(f => { window.__FAKE = f; if (f.teacher && f.edit !== false) localStorage.setItem("kt_editmode", "true"); }, fake);
   await page.goto(`http://127.0.0.1:${port}/index.html${hash}`);
   if (wait) await page.waitForFunction(() => { const v = document.querySelector("#view"); return v && v.children.length && !v.querySelector(":scope > .empty"); }, null, { timeout: 8000 });
   await page.evaluate(() => document.fonts && document.fonts.ready);
