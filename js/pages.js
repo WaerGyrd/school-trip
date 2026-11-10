@@ -1,8 +1,8 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js";
-import { DEFAULTS } from "./data.js";
-import * as S from "./store.js";
-import { icon } from "./icons.js";
-import { pickRound } from "./quiz.js";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261110b";
+import { DEFAULTS, CITY_INTRO } from "./data.js?v=20261110b";
+import * as S from "./store.js?v=20261110b";
+import { icon } from "./icons.js?v=20261110b";
+import { pickRound } from "./quiz.js?v=20261110b";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -57,25 +57,20 @@ const safeUrl = u => /^https?:\/\//i.test(String(u || "").trim()) ? String(u).tr
 const settingsForSave = () => ({ ...S.settings(), padlet: padletLink() });
 
 /* ---------- 메인 ---------- */
+let typed = false;   // 제목 타이핑 효과는 처음 들어왔을 때 한 번만
 export function pageHome(ctx) {
   ctx.setTop({ variant: "overlay" });
-  const st = S.settings();
+  const typing = !typed && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  typed = true;
+  let n = 0;
+  const line = t => [...t].map(c => `<span class="ch" style="--i:${n++}">${c === " " ? "&nbsp;" : esc(c)}</span>`).join("");
   ctx.view.innerHTML = `
     <section class="home">
       <img class="wm" src="assets/kish-wordmark.png" alt="KISH 10학년 수학여행" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'wm wm-txt',textContent:'KISH 10학년 수학여행'}))">
-      <div class="hcm">Ho Chi<br>Minh City</div>
-      <div class="bub"><img src="assets/logo.png" alt="" onerror="this.remove()"><p>${esc(st.home.desc)}</p></div>
-      ${ed() ? '<div class="home-edit">' + pen("editHome") + "</div>" : ""}
+      <div class="hcm ${typing ? "typing" : ""}" aria-label="Ho Chi Minh City">${line("Ho Chi")}<br>${line("Minh City")}</div>
+      <div class="bub"><img src="assets/logo.png" alt="" onerror="this.remove()"><p>${esc(CITY_INTRO)}</p></div>
       <div class="dev">개발자: 10229 조수민, 10524 이동선</div>
     </section>`;
-  bind(ctx, {
-    editHome: () => openForm({
-      title: "메인 소개 글",
-      fields: [{ k: "desc", label: "소개 글", type: "textarea", rows: 5 }],
-      values: { desc: st.home.desc },
-      onSave: v => { const cur = settingsForSave(); return save("settings", { ...cur, home: { ...cur.home, desc: v.desc } }); }
-    })
-  });
 }
 
 /* ---------- 일정 ---------- */
@@ -567,7 +562,7 @@ const T_FIELDS = [
 export function pageTeachers(ctx) {
   const list = S.get("teachers");
   page(ctx, `
-    <p class="intro">쌤들이 파워퍼프걸로 변신했어요!</p>
+    <p class="intro">10학년부 선생님들이 파워퍼프걸로 변신했어요!</p>
     <div class="tgrid">${list.map((t, i) => `
       <div class="tc t${i % 3}">
         ${t.role || t.subject ? `<small>${esc([t.role, t.subject].filter(Boolean).join(" · "))}</small>` : ""}
@@ -576,14 +571,14 @@ export function pageTeachers(ctx) {
         <p>${t.intro ? esc(t.intro) : "소개를 준비 중이에요"}</p>
         ${pen("editT", `data-i="${i}"`)}
       </div>`).join("")}</div>
-    ${addBtn("addT", "쌤 추가")}
+    ${addBtn("addT", "선생님 추가")}
     ${resetBar("teachers")}`, {
     reset: d => doReset(d.id),
     editT: d => openForm({
-      title: "쌤 소개 수정", fields: T_FIELDS, values: list[d.i],
+      title: "선생님 소개 수정", fields: T_FIELDS, values: list[d.i],
       onSave: v => mut("teachers", a => { a[d.i] = v; }),
       onDelete: () => mut("teachers", a => { a.splice(d.i, 1); })
     }),
-    addT: () => openForm({ title: "쌤 추가", fields: T_FIELDS, onSave: v => mut("teachers", a => { a.push(v); }) })
+    addT: () => openForm({ title: "선생님 추가", fields: T_FIELDS, onSave: v => mut("teachers", a => { a.push(v); }) })
   });
 }

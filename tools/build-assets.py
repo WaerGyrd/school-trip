@@ -30,7 +30,27 @@ def trimmed(src, dst, colors=None):
     im.save(os.path.join(OUT, dst), optimize=True)
 
 trimmed("logo.png", "kish-wordmark.png")                      # 받은 logo.png 는 사실 KISH 워드마크
-trimmed("image-removebg-preview (4).png", "logo.png", 128)    # 학교 로고
+def circle_logo(src, dst, size=240):
+    """학교 로고: 배경 제거 때 남은 흰 잔상을 지우고 완전한 원으로 자른다."""
+    im = Image.open(os.path.join(IMG, src)).convert("RGBA")
+    a = np.asarray(im).astype(int)
+    solid = (a[..., 3] > 200) & ~((a[..., 0] > 200) & (a[..., 1] > 200) & (a[..., 2] > 200))  # 흰색이 아닌 진한 부분(테두리)
+    ys, xs = np.nonzero(solid)
+    cx, cy = (xs.min() + xs.max()) / 2, (ys.min() + ys.max()) / 2
+    r = max(xs.max() - xs.min(), ys.max() - ys.min()) / 2
+    box = (round(cx - r), round(cy - r), round(cx + r), round(cy + r))
+    im = im.crop(box).resize((size, size), Image.LANCZOS)
+    big = Image.new("L", (size * 4, size * 4), 0)
+    from PIL import ImageDraw
+    ImageDraw.Draw(big).ellipse((0, 0, size * 4 - 1, size * 4 - 1), fill=255)
+    mask = big.resize((size, size), Image.LANCZOS)
+    out = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    inner = Image.new("RGBA", (size, size), (255, 255, 255, 255))   # 원 안쪽은 불투명하게
+    inner.alpha_composite(im)
+    out.paste(inner, (0, 0), mask)
+    out.save(os.path.join(OUT, dst), optimize=True)
+
+circle_logo("image-removebg-preview (4).png", "logo.png")    # 학교 로고
 
 # 코르크 무늬 (제공 안 됨 → 직접 생성)
 rng = np.random.default_rng(3)

@@ -1,6 +1,6 @@
-import { $, $$, esc, ls, toast, beep } from "./util.js";
-import * as S from "./store.js";
-import * as P from "./pages.js";
+import { $, $$, esc, ls, toast, beep } from "./util.js?v=20261110b";
+import * as S from "./store.js?v=20261110b";
+import * as P from "./pages.js?v=20261110b";
 
 const PAGES = {
   home: P.pageHome, schedule: P.pageSchedule, route: P.pageRoute, notice: P.pageNotice,
@@ -8,11 +8,11 @@ const PAGES = {
 };
 // 어떤 데이터가 바뀌면 어떤 화면을 다시 그릴지
 const DEPS = {
-  home: ["settings", "auth"], schedule: ["schedule", "settings", "auth"], route: ["routes", "schedule", "auth"],
+  home: [], schedule: ["schedule", "settings", "auth"], route: ["routes", "schedule", "auth"],
   notice: ["notice", "auth"], learn: ["learn", "auth"], quiz: ["quiz", "auth"], photo: ["auth"], teachers: ["teachers", "auth"]
 };
-const TITLES = { schedule: "수학여행 일정", route: "이동 경로", notice: "공지 사항", learn: "배워 가기", quiz: "O & X 퀴즈", photo: "포토존", teachers: "쌤 소개" };
-const LABELS = { schedule: "일정", routes: "이동 경로", learn: "배워 가기", quiz: "퀴즈", teachers: "쌤 소개", settings: "메인 소개·팀 배정" };
+const TITLES = { schedule: "수학여행 일정", route: "이동 경로", notice: "공지 사항", learn: "배워 가기", quiz: "O & X 퀴즈", photo: "포토존", teachers: "10학년부 선생님들 소개" };
+const LABELS = { schedule: "일정", routes: "이동 경로", learn: "배워 가기", quiz: "퀴즈", teachers: "선생님 소개", settings: "설정·팀 배정" };
 
 const view = $("#view");
 let unread = 0;
@@ -100,7 +100,7 @@ function drawerExtra() {
       <button class="btn ghost" id="dxOut">로그아웃</button>`
     : `
       <form id="dxLogin">
-        <label class="dx">교사 로그인
+        <label class="dx">교사 및 관리자 로그인
           <input id="dxEmail" type="text" placeholder="아이디 (예: t1@kish.app)" autocapitalize="none" autocomplete="username">
           <input id="dxPw" type="password" placeholder="비밀번호" autocomplete="current-password" style="margin-top:6px">
         </label>

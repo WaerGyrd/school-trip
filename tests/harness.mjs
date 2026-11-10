@@ -25,9 +25,9 @@ async function ensure() {
   if (!browser) browser = await chromium.launch();
 }
 
-export async function openPage({ width = 390, height = 844, hash = "#/", fake = {}, wait = true } = {}) {
+export async function openPage({ width = 390, height = 844, hash = "#/", fake = {}, wait = true, reducedMotion = false } = {}) {
   await ensure();
-  const ctx = await browser.newContext({ viewport: { width, height } });
+  const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: reducedMotion ? "reduce" : "no-preference" });
   const page = await ctx.newPage();
   // 나중에 등록한 route가 먼저 처리되므로: 외부 차단을 먼저, Firebase 가짜 모듈을 나중에 등록
   await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, route => route.abort());

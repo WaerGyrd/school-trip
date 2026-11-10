@@ -36,8 +36,8 @@ test("long URLs in teacher text do not cause sideways scroll", async () => {
 });
 
 test("save toast has no emoji", async () => {
-  const { page, close } = await openPage({ hash: "#/", fake: { teacher: T } });
-  await page.click('#view [data-act="editHome"]');
+  const { page, close } = await openPage({ hash: "#/photo", fake: { teacher: T } });
+  await page.click('#view [data-act="editPadlet"]');
   await page.click("#mfSave");
   await page.waitForSelector("#toasts .toast");
   const t = await page.locator("#toasts").innerText();

@@ -30,7 +30,7 @@ svg.ic { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-wid
 #menuBtn { background: none; border: 0; padding: 6px; position: relative; display: inline-flex; color: var(--tx); }
 #menuDot { position: absolute; top: 4px; right: 2px; }
 #topLogo { justify-self: end; display: inline-flex; }
-#topLogo img { width: 34px; height: 34px; border-radius: 50%; background: #fff; }
+#topLogo img { width: 34px; height: 34px; border-radius: 50%; }
 #topbar.tb-overlay { position: absolute; left: 0; right: 0; background: none; }
 #topbar.tb-overlay h1, #topbar.tb-overlay #topLogo { visibility: hidden; }
 #topbar.tb-overlay #menuBtn { color: #fff; }
@@ -122,19 +122,27 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
 .home .wm-txt { font-family: "A2Z"; font-size: 30px; text-align: center; width: auto; line-height: 1.1; }
 .hcm { font-family: "Forward", serif; font-size: 52px; line-height: 1.05; margin: 96px 0 0 30px; text-shadow: 0 2px 12px rgba(0, 0, 0, .35); }
 .bub { display: flex; align-items: flex-end; gap: 6px; margin: 28px 22px 0; }
-.bub img { width: 46px; height: 46px; flex: none; border-radius: 50%; background: #fff; }
+.bub img { width: 46px; height: 46px; flex: none; border-radius: 50%; }
 .bub p { margin: 0; background: #E9E9EB; color: #111; border-radius: 16px; padding: 12px 16px; font-size: 14.5px; line-height: 1.55; position: relative; max-width: 350px; white-space: pre-line; }
 .bub p::before { content: ""; position: absolute; left: -7px; bottom: 0; width: 16px; height: 16px; background: #E9E9EB; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
 .home-edit { margin: 10px 0 0 74px; }
 .home-edit .edit { color: #fff; border-color: rgba(255, 255, 255, .6); }
-.home .dev { position: absolute; bottom: 14px; left: 0; right: 0; text-align: center; font-size: 13px; text-shadow: 0 1px 4px #000; }
+.home .dev { position: absolute; bottom: 14px; left: 0; right: 0; text-align: center; font-size: 13px; font-weight: 700; text-shadow: 0 1px 4px #000; }
+/* 제목 타이핑: 글자가 하나씩 나타나고, 방금 나온 글자 뒤에 커서가 깜빡임 */
+.hcm .ch { position: relative; }
+.hcm.typing .ch { opacity: 0; animation: ch-in 1ms linear forwards; animation-delay: calc(var(--i) * 95ms + 350ms); }
+.hcm.typing .ch::after { content: ""; position: absolute; right: -3px; top: .12em; bottom: .02em; width: 3px; background: #fff; opacity: 0; animation: caret 95ms step-end; animation-delay: calc(var(--i) * 95ms + 350ms); }
+.hcm.typing .ch:last-child::after { animation: caret-end 1.6s step-end; animation-delay: calc(var(--i) * 95ms + 350ms); }
+@keyframes ch-in { to { opacity: 1; } }
+@keyframes caret { 0% { opacity: 1; } }
+@keyframes caret-end { 0%, 50% { opacity: 1; } 25%, 75% { opacity: 0; } }
 @media (min-width: 900px) {
-  .home .wm { position: absolute; top: 34px; right: 31%; width: 160px; padding: 0; margin: 0; }
+  .home .wm { position: absolute; top: 34px; left: 50%; transform: translateX(-50%); width: 170px; padding: 0; margin: 0; }
   .hcm { font-size: 96px; margin: 220px 0 0 9%; }
   .home .bub { position: absolute; top: 240px; right: 6%; margin: 0; }
   .bub p { max-width: 420px; font-size: 17px; }
   .home-edit { position: absolute; top: 200px; right: 6%; margin: 0; }
-  .home .dev { left: 40px; right: auto; text-align: left; bottom: 22px; }
+  .home .dev { left: 40px; right: auto; text-align: left; bottom: 24px; font-size: 16px; }
 }
 
 /* ===== 일정 ===== */

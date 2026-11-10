@@ -45,15 +45,15 @@ test("teacher saves padlet link without losing home text", async () => {
   await close();
 });
 
-test("saving home text keeps the padlet link", async () => {
-  const { page, close } = await openPage({ hash: "#/", fake: { teacher: T, content: { settings: { home: { desc: "a" }, teams: {}, padlet: "https://padlet.com/keep" } } } });
-  await page.waitForSelector('#view [data-act="editHome"]');
-  await page.click('#view [data-act="editHome"]');
-  await page.fill('#mf [name="desc"]', "새 소개");
-  await page.click("#mfSave");
+test("saving team assignment keeps the padlet link", async () => {
+  const { page, close } = await openPage({ hash: "#/schedule/2", fake: { teacher: T, content: { settings: { home: { desc: "a" }, teams: {}, padlet: "https://padlet.com/keep" } } } });
+  page.on("dialog", d => d.accept());
+  await page.waitForSelector('#view [data-act="teamPreset"]');
+  await page.click('#view [data-act="teamPreset"]');
+  await page.waitForFunction(() => (window.__WRITES || []).some(w => w.path === "content/settings"));
   const j = await lastSettingsWrite(page);
   assert.equal(j.padlet, "https://padlet.com/keep");
-  assert.equal(j.home.desc, "새 소개");
+  assert.equal(j.teams[2][1], "A");
   await close();
 });
 
