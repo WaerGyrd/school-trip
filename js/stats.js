@@ -2,8 +2,8 @@
 // Firestore stats/{YYYY-MM-DD} = { visitors: 그날 방문한 기기 수, hours: { "09": 그 시간에 들어온 기기 수, ... } }
 import { getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, setDoc, getDocs, collection, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { ls, vnNow } from "./util.js?v=20261113b";
-import { configured } from "./store.js?v=20261113b";
+import { ls, vnNow } from "./util.js?v=20261113e";
+import { configured } from "./store.js?v=20261113e";
 
 const db = () => getFirestore(getApp());
 export const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));

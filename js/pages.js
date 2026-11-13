@@ -1,9 +1,9 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261113b";
-import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261113b";
-import * as S from "./store.js?v=20261113b";
-import { icon } from "./icons.js?v=20261113b";
-import { pickRound } from "./quiz.js?v=20261113b";
-import { loadStats, toCsv, HOURS } from "./stats.js?v=20261113b";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261113e";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261113e";
+import * as S from "./store.js?v=20261113e";
+import { icon } from "./icons.js?v=20261113e";
+import { pickRound } from "./quiz.js?v=20261113e";
+import { loadStats, toCsv, HOURS } from "./stats.js?v=20261113e";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -185,6 +185,7 @@ function scheduleList(ctx, days) {
     <section class="sched-list">
       <p class="lead">${esc(tripRange(days))}</p>
       <div class="tks">${tks}</div>
+      <p class="sched-note">※ 현지 교통 및 기상 상황에 따라 세부 일정은 일부 변경될 수 있습니다.</p>
       ${resetBar("schedule")}
       <div class="dev">개발자: 10229 조수민, 10524 이동선</div>
     </section>`;
@@ -228,6 +229,7 @@ function scheduleDay(ctx, days, di) {
     ${hasTeams ? `<div class="tabs2">${["A", "B"].map(k => `<a class="${team === k ? "on" : ""}" href="#/schedule/${di}/${k}">${k}팀</a>`).join("")}${myc && myTeam ? `<span class="mute my">내 반(${myc}반) ${myTeam}팀</span>` : ""}</div>` : ""}
     ${teamCard}
     <div class="halves">${half("오전", am)}${half("오후", pm)}</div>
+    <p class="sched-note">※ 현지 교통 및 기상 상황에 따라 세부 일정은 일부 변경될 수 있습니다.</p>
     ${addBtn("addItem", "일정 추가")}
     ${resetBar("schedule")}`, {
     reset: d => doReset(d.id),
@@ -608,7 +610,7 @@ export function pagePhoto(ctx) {
         <img class="ig-qr" src="${INSTAGRAM.qr}" alt="인스타그램 ${INSTAGRAM.id} QR 코드">
         <a class="ig-id" href="${INSTAGRAM.url}" target="_blank" rel="noopener">@${INSTAGRAM.id}</a>
       </div>
-      <p class="ig-txt">반별 사진과 수학여행 소식을 올려요.<br>QR을 찍거나 아래 버튼을 눌러 팔로우해 주세요.</p>
+      <p class="ig-txt"><b>수학여행 일정과 이벤트가 여기서 공지됩니다.</b><br>QR을 찍거나 아래 버튼을 눌러 팔로우해 주세요.</p>
       <a class="ig-go" href="${INSTAGRAM.url}" target="_blank" rel="noopener">인스타그램에서 보기 ${icon("out")}</a>
     </section>`);
 }

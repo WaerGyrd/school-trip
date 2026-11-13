@@ -16,6 +16,7 @@ test("photo zone became the support team's Instagram", async () => {
   assert.equal(await a.getAttribute("href"), URL);
   assert.equal(await a.getAttribute("target"), "_blank");
   assert.doesNotMatch(await page.locator("#view").innerText(), /패들렛/);
+  assert.match(await page.locator("#view .ig-txt").innerText(), /수학여행 일정과 이벤트가 여기서 공지됩니다\./);
   await close();
 });
 

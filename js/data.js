@@ -15,48 +15,49 @@ export const DEFAULTS = {
   schedule: [
     {
       date: "2026-11-18", label: "11/18 (수)", title: "하노이 → 호치민 → 호짬",
-      summary: "VN209 · 통일궁 관람 · 하버 식당 · 호텔 체크인", tagline: "비행기 타고 남쪽으로, 통일궁 보고 바닷가 호텔로", info: "",
+      summary: "VN209 · 통일궁 관람 · 붕따우 호짬 · 호텔 체크인", tagline: "비행기 타고 남쪽으로, 통일궁 보고 바닷가 호텔로", info: "",
       items: [
-        { t: "05:00", e: "07:00", title: "픽업 · 공항 이동", desc: "7시 공항 도착", team: "all" },
-        { t: "09:00", e: "11:10", title: "VN209 하노이 → 호치민", desc: "기내 간식 제공", team: "all" },
-        { t: "11:10", e: "12:00", title: "식당으로 이동", desc: "", team: "all" },
-        { t: "12:00", e: "13:00", title: "점심 · 아리랑 식당", desc: "한식 · 제육볶음, 해물파전 등", team: "all" },
-        { t: "13:00", e: "14:00", title: "통일궁 관람", desc: "", team: "all" },
-        { t: "14:00", e: "17:00", title: "붕따우 · 호짬으로 이동", desc: "", team: "all" },
-        { t: "17:00", e: "18:00", title: "저녁 · 하버 식당", desc: "현지식 세트 메뉴 (에메랄드 호짬 리조트 안)", team: "all" },
-        { t: "18:00", e: "20:30", title: "호텔 체크인", desc: "Holiday Inn Resort Ho Tram", team: "all" },
-        { t: "20:30", e: "23:00", title: "야식 · 자유 시간", desc: "", team: "all" }
+        { t: "05:30", e: "07:00", title: "지정 장소에서 승차 · 공항 이동", desc: "7시 공항 도착", team: "all" },
+        { t: "09:00", e: "11:10", title: "하노이 출발 · 호치민 도착", desc: "베트남항공 VN209편 09:00 출발, 11:10 호치민 도착\n간식 제공", team: "all" },
+        { t: "11:10", e: "12:00", title: "호치민 공항에서 식당으로 이동", desc: "", team: "all" },
+        { t: "12:00", e: "13:00", title: "중식 (한식)", desc: "제육볶음, 해물파전 등 · 아리랑 식당", team: "all" },
+        { t: "13:00", e: "14:00", title: "베트남 통일궁 관람", desc: "반별 사진 촬영", team: "all" },
+        { t: "14:00", e: "17:00", title: "붕따우 호짬으로 이동", desc: "", team: "all" },
+        { t: "17:00", e: "18:00", title: "석식 (현지식 세트 메뉴)", desc: "하버 식당 (에메랄드 호짬 리조트 안)", team: "all" },
+        { t: "18:00", e: "20:30", title: "호텔 체크인 · 휴식", desc: "숙소: Holiday Inn Resort Ho Tram", team: "all" },
+        { t: "20:30", e: "23:00", title: "야간 간식 · 자유 시간", desc: "", team: "all" }
       ]
     },
     {
       date: "2026-11-19", label: "11/19 (목)", title: "붕따우",
-      summary: "붕따우 광장 단체 사진 · A팀 썬월드 · B팀 시내 투어 · 레크리에이션", tagline: "바다 보고, 워터파크 아니면 시내 투어",
+      summary: "땀탕 광장 단체 사진 · A팀 선월드 · B팀 시내 투어 · 장기자랑", tagline: "바다 보고, 워터파크 아니면 시내 투어",
       info: "A팀/B팀 반 배정은 정해지면 알려드려요.",
       items: [
-        { t: "07:00", e: "09:00", title: "호텔 조식", desc: "", team: "all" },
-        { t: "09:00", e: "10:00", title: "붕따우 광장으로 이동", desc: "반별 버스로 이동\n단체 사진 · 반별 사진 촬영, 바다 구경", team: "all" },
-        { t: "10:00", e: "16:00", title: "썬월드 워터파크", desc: "점심은 워터파크 안 뷔페", team: "A" },
-        { t: "10:00", e: "16:00", title: "붕따우 시내 투어", desc: "예수상 · 화이트 팰리스 · 붕따우 성당\n점심은 현지식 세트 메뉴", team: "B" },
-        { t: "16:00", e: "17:00", title: "호텔로 이동", desc: "", team: "all" },
-        { t: "17:00", e: "17:30", title: "개인 정비", desc: "", team: "all" },
-        { t: "17:30", e: "19:00", title: "저녁 식사", desc: "호텔식 뷔페", team: "all" },
-        { t: "19:00", e: "21:30", title: "레크리에이션", desc: "호텔 컨퍼런스룸 · 피자, 음료 제공", team: "all" }
+        { t: "07:00", e: "08:30", title: "조식 (호텔식) · 준비", desc: "", team: "all" },
+        { t: "08:30", e: "10:30", title: "호텔에서 붕따우로 이동", desc: "붕따우 땀탕 광장에서 단체 사진 · 반별 사진 촬영 및 휴식", team: "all" },
+        { t: "10:30", e: "16:00", title: "선월드 워터파크", desc: "중식: 워터파크 안 뷔페", team: "A" },
+        { t: "10:30", e: "16:00", title: "붕따우 시내 투어", desc: "예수상 · 화이트 팰리스 · 바이저우 성모 성지\n중식: 워터파크 안 뷔페", team: "B" },
+        { t: "16:00", e: "17:00", title: "붕따우에서 호텔로 이동", desc: "", team: "all" },
+        { t: "17:00", e: "17:30", title: "호텔에서 개인 정비", desc: "", team: "all" },
+        { t: "17:30", e: "19:00", title: "저녁 식사 (호텔식 뷔페)", desc: "", team: "all" },
+        { t: "19:00", e: "", title: "장기자랑 · 휴식", desc: "호텔 안 컨퍼런스룸 · 피자, 음료 제공", team: "all" }
       ]
     },
     {
       date: "2026-11-20", label: "11/20 (금)", title: "호치민 → 하노이",
-      summary: "송빈 성당 · 강남BBQ · 전쟁·역사 박물관 · VN254", tagline: "박물관 두 곳, 그리고 집으로", info: "",
+      summary: "송빈 성당 · 한식 점심 · 전쟁·역사 박물관 · VN254", tagline: "박물관 두 곳, 그리고 집으로",
+      info: "교통 및 현지 상황에 따라 박물관 1곳만 관람할 수 있어요.",
       items: [
-        { t: "07:00", e: "08:00", title: "호텔 조식", desc: "", team: "all" },
-        { t: "08:00", e: "10:00", title: "호치민으로 이동", desc: "", team: "all" },
-        { t: "10:00", e: "10:30", title: "송빈 성당", desc: "사진 촬영 · 화장실", team: "all" },
-        { t: "10:30", e: "12:00", title: "호치민 도착", desc: "", team: "all" },
-        { t: "12:00", e: "13:00", title: "점심 · 강남BBQ / 미각", desc: "붙어 있는 두 식당에 3개 반씩\n제육볶음, 간장 불고기 등", team: "all" },
-        { t: "13:00", e: "15:30", title: "전쟁 박물관 → 역사 박물관", desc: "1, 2, 3반", team: "A" },
-        { t: "13:00", e: "15:30", title: "역사 박물관 → 전쟁 박물관", desc: "4, 5, 6반", team: "B" },
-        { t: "15:30", e: "17:00", title: "공항으로 이동", desc: "공항 주차장에 모여 햄버거 먹고 공항으로", team: "all" },
-        { t: "17:00", e: "19:10", title: "VN254 호치민 → 하노이", desc: "", team: "all" },
-        { t: "19:10", e: "20:00", title: "하노이 도착", desc: "배정된 차량으로 귀가", team: "all" }
+        { t: "07:00", e: "08:00", title: "조식 (호텔식)", desc: "", team: "all" },
+        { t: "08:00", e: "10:00", title: "호텔에서 호치민으로 이동", desc: "", team: "all" },
+        { t: "10:00", e: "10:30", title: "송빈 성당", desc: "단체 사진 촬영 · 휴식 (화장실 이용)", team: "all" },
+        { t: "10:30", e: "12:00", title: "호치민으로 이동 · 도착", desc: "", team: "all" },
+        { t: "12:00", e: "13:00", title: "중식 (한식)", desc: "제육볶음, 간장불고기 등 · 강남BBQ / 미각 (3개 반씩)", team: "all" },
+        { t: "13:00", e: "15:00", title: "전쟁박물관 → 역사박물관", desc: "10-1·2·3반", team: "A" },
+        { t: "13:00", e: "15:00", title: "역사박물관 → 전쟁박물관", desc: "10-4·5·6반", team: "B" },
+        { t: "15:00", e: "17:00", title: "호치민 공항으로 이동 · 대기", desc: "햄버거 제공", team: "all" },
+        { t: "17:00", e: "19:10", title: "호치민 출발 · 하노이 도착", desc: "베트남항공 VN254편 17:00 출발, 19:10 하노이 도착", team: "all" },
+        { t: "19:10", e: "", title: "하노이 도착 · 귀가", desc: "공항에서 배차된 차량으로 귀가", team: "all" }
       ]
     }
   ],
@@ -66,16 +67,16 @@ export const DEFAULTS = {
     { day: 1, dep: "11:10", title: "공항 → 아리랑 식당", fromQ: "Tan Son Nhat International Airport", toQ: "Arirang Korean restaurant Ho Chi Minh City", time: "", dist: "", note: "", todo: true, img: "" },
     { day: 1, dep: "13:00", title: "아리랑 식당 → 통일궁", fromQ: "Arirang Korean restaurant Ho Chi Minh City", toQ: "Reunification Palace Ho Chi Minh City", time: "", dist: "", note: "", todo: true, img: "" },
     { day: 1, dep: "14:00", title: "통일궁 → 하버 식당", fromQ: "Reunification Palace Ho Chi Minh City", toQ: "10.4711464,107.3982098", time: "", dist: "", note: "하버 식당은 에메랄드 호짬 리조트 안에 있어요.", todo: false, img: "" },
-    { day: 2, dep: "09:00", title: "호텔 → 붕따우 광장", fromQ: "Holiday Inn Resort Ho Tram Beach", toQ: "10.3455555,107.097283", time: "", dist: "", note: "", todo: false, img: "" },
-    { day: 2, dep: "10:00", title: "A팀 · 붕따우 광장 → 썬월드", fromQ: "10.3455555,107.097283", toQ: "Sun World Vung Tau", time: "", dist: "", note: "", todo: true, img: "" },
-    { day: 2, dep: "10:00", title: "B팀 · 붕따우 광장 → 시내 투어", fromQ: "10.3455555,107.097283", toQ: "Statue of Jesus Christ Vung Tau", time: "", dist: "", note: "예수상 · 화이트 팰리스 · 붕따우 성당 순서는 현장에서 안내해요.", todo: false, img: "" },
-    { day: 2, dep: "16:00", title: "A팀 · 썬월드 → 호텔", fromQ: "Sun World Vung Tau", toQ: "Holiday Inn Resort Ho Tram Beach", time: "", dist: "", note: "", todo: true, img: "" },
+    { day: 2, dep: "08:30", title: "호텔 → 땀탕 광장", fromQ: "Holiday Inn Resort Ho Tram Beach", toQ: "10.3455555,107.097283", time: "", dist: "", note: "", todo: false, img: "" },
+    { day: 2, dep: "10:30", title: "A팀 · 땀탕 광장 → 선월드", fromQ: "10.3455555,107.097283", toQ: "Sun World Vung Tau", time: "", dist: "", note: "", todo: true, img: "" },
+    { day: 2, dep: "10:30", title: "B팀 · 땀탕 광장 → 시내 투어", fromQ: "10.3455555,107.097283", toQ: "Statue of Jesus Christ Vung Tau", time: "", dist: "", note: "예수상 · 화이트 팰리스 · 바이저우 성모 성지 순서는 현장에서 안내해요.", todo: false, img: "" },
+    { day: 2, dep: "16:00", title: "A팀 · 선월드 → 호텔", fromQ: "Sun World Vung Tau", toQ: "Holiday Inn Resort Ho Tram Beach", time: "", dist: "", note: "", todo: true, img: "" },
     { day: 2, dep: "16:00", title: "B팀 · 시내 → 호텔", fromQ: "Statue of Jesus Christ Vung Tau", toQ: "Holiday Inn Resort Ho Tram Beach", time: "", dist: "", note: "", todo: false, img: "" },
     { day: 3, dep: "08:00", title: "호텔 → 송빈 성당", fromQ: "Holiday Inn Resort Ho Tram Beach", toQ: "10.5713214,107.0557317", time: "", dist: "", note: "", todo: false, img: "" },
     { day: 3, dep: "10:30", title: "송빈 성당 → 강남BBQ · 미각", fromQ: "10.5713214,107.0557317", toQ: "10.7330398,106.7082962", time: "", dist: "", note: "두 식당이 붙어 있어요. 3개 반씩 나눠 들어가요.", todo: false, img: "" },
-    { day: 3, dep: "13:00", title: "A팀 · 전쟁 박물관 → 역사 박물관", fromQ: "War Remnants Museum Ho Chi Minh City", toQ: "Museum of Vietnamese History Ho Chi Minh City", time: "", dist: "", note: "1, 2, 3반", todo: false, img: "" },
-    { day: 3, dep: "13:00", title: "B팀 · 역사 박물관 → 전쟁 박물관", fromQ: "Museum of Vietnamese History Ho Chi Minh City", toQ: "War Remnants Museum Ho Chi Minh City", time: "", dist: "", note: "4, 5, 6반", todo: false, img: "" },
-    { day: 3, dep: "15:30", title: "박물관 → 공항", fromQ: "War Remnants Museum Ho Chi Minh City", toQ: "Tan Son Nhat International Airport", time: "", dist: "", note: "공항 주차장에 모여 햄버거를 먹고 들어가요.", todo: false, img: "" }
+    { day: 3, dep: "13:00", title: "A팀 · 전쟁 박물관 → 역사 박물관", fromQ: "War Remnants Museum Ho Chi Minh City", toQ: "Museum of Vietnamese History Ho Chi Minh City", time: "", dist: "", note: "10-1·2·3반", todo: false, img: "" },
+    { day: 3, dep: "13:00", title: "B팀 · 역사 박물관 → 전쟁 박물관", fromQ: "Museum of Vietnamese History Ho Chi Minh City", toQ: "War Remnants Museum Ho Chi Minh City", time: "", dist: "", note: "10-4·5·6반", todo: false, img: "" },
+    { day: 3, dep: "15:00", title: "박물관 → 공항", fromQ: "War Remnants Museum Ho Chi Minh City", toQ: "Tan Son Nhat International Airport", time: "", dist: "", note: "공항에서 대기하며 햄버거가 제공돼요.", todo: false, img: "" }
   ],
 
   // when: 언제 가는지 / label: "○○, 박물관 가기 전 딱 N가지만 알자!" 의 ○○
