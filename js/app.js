@@ -1,6 +1,6 @@
-import { $, $$, esc, ls, toast, beep } from "./util.js?v=20261110d";
-import * as S from "./store.js?v=20261110d";
-import * as P from "./pages.js?v=20261110d";
+import { $, $$, esc, ls, toast, beep } from "./util.js?v=20261113a";
+import * as S from "./store.js?v=20261113a";
+import * as P from "./pages.js?v=20261113a";
 
 const PAGES = {
   home: P.pageHome, schedule: P.pageSchedule, route: P.pageRoute, notice: P.pageNotice,
@@ -11,7 +11,7 @@ const DEPS = {
   home: [], schedule: ["schedule", "settings", "auth"], route: ["routes", "schedule", "auth"],
   notice: ["notice", "auth"], learn: ["learn", "auth"], quiz: ["quiz", "auth"], photo: ["auth"], teachers: ["teachers", "auth"]
 };
-const TITLES = { schedule: "수학여행 일정", route: "이동 경로", notice: "공지 사항", learn: "배워 가기", quiz: "O & X 퀴즈", photo: "포토존", teachers: "10학년부 선생님들 소개" };
+const TITLES = { schedule: "수학여행 일정", route: "이동 경로", notice: "공지 사항", learn: "배워 가기", quiz: "O & X 퀴즈", photo: "지원단 인스타그램", teachers: "10학년부 선생님들 소개" };
 const LABELS = { schedule: "일정", routes: "이동 경로", learn: "배워 가기", quiz: "퀴즈", teachers: "선생님 소개", settings: "설정·팀 배정" };
 
 const view = $("#view");

@@ -1,8 +1,8 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261110d";
-import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS } from "./data.js?v=20261110d";
-import * as S from "./store.js?v=20261110d";
-import { icon } from "./icons.js?v=20261110d";
-import { pickRound } from "./quiz.js?v=20261110d";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261113a";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261113a";
+import * as S from "./store.js?v=20261113a";
+import { icon } from "./icons.js?v=20261113a";
+import { pickRound } from "./quiz.js?v=20261113a";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -52,8 +52,7 @@ export function padletLink() {
   const v = (S.state.content.settings || {}).padlet;
   return v !== undefined ? v : DEFAULTS.settings.padlet;
 }
-// 선생님이 입력한 링크는 http(s) 주소일 때만 링크로 씀 (javascript: 같은 주소 차단)
-const safeUrl = u => /^https?:\/\//i.test(String(u || "").trim()) ? String(u).trim() : "";
+
 const settingsForSave = () => ({ ...S.settings(), padlet: padletLink() });
 
 /* ---------- 메인 ---------- */
@@ -539,21 +538,18 @@ export function pageQuiz(ctx) {
   ctx.leave(S.watchScores(list => { scores = list; const el = $("#rank"); if (el) el.innerHTML = rankHtml(); }));
 }
 
-/* ---------- 포토존 (사진은 패들렛에) ---------- */
+/* ---------- 지원단 인스타그램 (예전 포토존) ---------- */
 export function pagePhoto(ctx) {
-  const link = safeUrl(padletLink());
   page(ctx, `
-    <div class="board"><div class="pol"><div class="ph">${icon("cam")}반별 사진은 패들렛에</div>
-      <p>반별로 주제에 맞는 사진을 올려주세요.<br>수학여행이 끝나고 베스트 포토상을 뽑아요.</p></div></div>
-    ${link ? `<a class="pbtn" href="${esc(link)}" target="_blank" rel="noopener">패들렛에서 사진 올리기 ${icon("out")}</a>` : '<span class="pbtn off">패들렛 링크 준비 중이에요</span>'}
-    ${ed() ? `<div class="row" style="justify-content:center;margin-top:12px">${pen("editPadlet")}</div>` : ""}`, {
-    editPadlet: () => openForm({
-      title: "패들렛 링크 수정",
-      fields: [{ k: "padlet", label: "패들렛 주소 (비우면 '준비 중'으로 보여요)", ph: "https://padlet.com/..." }],
-      values: { padlet: padletLink() },
-      onSave: v => save("settings", { ...settingsForSave(), padlet: v.padlet })
-    })
-  });
+    <section class="ig">
+      <p class="eyebrow">수학여행 지원단 인스타그램</p>
+      <div class="ig-card">
+        <img class="ig-qr" src="${INSTAGRAM.qr}" alt="인스타그램 ${INSTAGRAM.id} QR 코드">
+        <a class="ig-id" href="${INSTAGRAM.url}" target="_blank" rel="noopener">@${INSTAGRAM.id}</a>
+      </div>
+      <p class="ig-txt">반별 사진과 수학여행 소식을 올려요.<br>QR을 찍거나 아래 버튼을 눌러 팔로우해 주세요.</p>
+      <a class="ig-go" href="${INSTAGRAM.url}" target="_blank" rel="noopener">인스타그램에서 보기 ${icon("out")}</a>
+    </section>`);
 }
 
 /* ---------- 쌤 소개 ---------- */
