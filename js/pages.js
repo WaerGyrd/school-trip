@@ -1,8 +1,8 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261113c";
-import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261113c";
-import * as S from "./store.js?v=20261113c";
-import { icon } from "./icons.js?v=20261113c";
-import { pickRound } from "./quiz.js?v=20261113c";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261113d";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261113d";
+import * as S from "./store.js?v=20261113d";
+import { icon } from "./icons.js?v=20261113d";
+import { pickRound } from "./quiz.js?v=20261113d";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -124,6 +124,7 @@ function scheduleList(ctx, days) {
     <section class="sched-list">
       <p class="lead">${esc(tripRange(days))}</p>
       <div class="tks">${tks}</div>
+      <p class="sched-note">※ 현지 교통 및 기상 상황에 따라 세부 일정은 일부 변경될 수 있습니다.</p>
       ${resetBar("schedule")}
       <div class="dev">개발자: 10229 조수민, 10524 이동선</div>
     </section>`;
@@ -167,6 +168,7 @@ function scheduleDay(ctx, days, di) {
     ${hasTeams ? `<div class="tabs2">${["A", "B"].map(k => `<a class="${team === k ? "on" : ""}" href="#/schedule/${di}/${k}">${k}팀</a>`).join("")}${myc && myTeam ? `<span class="mute my">내 반(${myc}반) ${myTeam}팀</span>` : ""}</div>` : ""}
     ${teamCard}
     <div class="halves">${half("오전", am)}${half("오후", pm)}</div>
+    <p class="sched-note">※ 현지 교통 및 기상 상황에 따라 세부 일정은 일부 변경될 수 있습니다.</p>
     ${addBtn("addItem", "일정 추가")}
     ${resetBar("schedule")}`, {
     reset: d => doReset(d.id),

@@ -358,3 +358,5 @@ body.editing .home .dev { bottom: 54px; }
 .ig-txt { color: var(--mute); font-size: 14px; margin: 16px 0 0; line-height: 1.7; }
 .ig-txt b { color: var(--tx); font-family: "A2Z"; font-size: 16px; font-weight: 700; }
 .ig-go { display: flex; align-items: center; justify-content: center; gap: 6px; width: min(100%, 340px); margin: 18px auto 0; padding: 15px; border-radius: 12px; background: var(--tx); color: var(--ink); font-family: "A2Z"; font-size: 17px; text-decoration: none; }
+.sched-note { font-size: 12px; color: var(--mute); text-align: center; margin: 4px 18px 0; }
+.halves + .sched-note { text-align: left; margin: 8px 0 0; }
