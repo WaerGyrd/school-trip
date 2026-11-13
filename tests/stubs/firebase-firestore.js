@@ -58,3 +58,9 @@ export const setDoc = async (ref, data) => { W().push({ op: "set", path: ref.pat
 export const updateDoc = async (ref, data) => { W().push({ op: "update", path: ref.path, data }); };
 export const deleteDoc = async ref => { W().push({ op: "delete", path: ref.path }); };
 export const addDoc = async (ref, data) => { W().push({ op: "add", path: ref.path, data }); return { id: "new" + W().length }; };
+// 방문자 통계: stats/{날짜} 문서들
+export const getDocs = async ref => {
+  const f = F();
+  const src = ref.path === "stats" ? (f.stats || {}) : {};
+  return { docs: Object.entries(src).map(([id, d]) => ({ id, data: () => d })) };
+};

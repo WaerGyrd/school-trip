@@ -1,8 +1,9 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261110d";
-import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS } from "./data.js?v=20261110d";
-import * as S from "./store.js?v=20261110d";
-import { icon } from "./icons.js?v=20261110d";
-import { pickRound } from "./quiz.js?v=20261110d";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261113b";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261113b";
+import * as S from "./store.js?v=20261113b";
+import { icon } from "./icons.js?v=20261113b";
+import { pickRound } from "./quiz.js?v=20261113b";
+import { loadStats, toCsv, HOURS } from "./stats.js?v=20261113b";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -52,8 +53,7 @@ export function padletLink() {
   const v = (S.state.content.settings || {}).padlet;
   return v !== undefined ? v : DEFAULTS.settings.padlet;
 }
-// 선생님이 입력한 링크는 http(s) 주소일 때만 링크로 씀 (javascript: 같은 주소 차단)
-const safeUrl = u => /^https?:\/\//i.test(String(u || "").trim()) ? String(u).trim() : "";
+
 const settingsForSave = () => ({ ...S.settings(), padlet: padletLink() });
 
 /* ---------- 메인 ---------- */
@@ -71,7 +71,67 @@ export function pageHome(ctx) {
       <div class="bub"><img src="assets/logo.png" alt="" onerror="this.remove()"><p>${esc(CITY_INTRO)}</p></div>
       <div class="edit-switch" hidden><span>편집 모드</span><button class="switch" role="switch" aria-checked="false" aria-label="편집 모드" data-toggle-edit></button></div>
       <div class="dev">개발자: 10229 조수민, 10524 이동선</div>
+      <button class="stats-pill" data-act="statsOpen">${icon("user")}오늘 방문자 수 / 총 방문자 수</button>
+      <div class="stats-panel" hidden></div>
     </section>`;
+  let rows = [], day = "";
+  const panel = () => ctx.view.querySelector(".stats-panel");
+  const draw = () => {
+    const today = vnNow().date;
+    const todayN = (rows.find(r => r.day === today) || {}).visitors || 0;
+    const total = rows.reduce((a, r) => a + r.visitors, 0);
+    const cur = rows.find(r => r.day === day);
+    panel().innerHTML = `
+      <button class="st-close" data-act="statsClose" aria-label="닫기">${icon("close")}</button>
+      <div class="st-hd">오늘 방문자 수 / 총 방문자 수</div>
+      <div class="st-num"><b class="st-today">${todayN}명</b><span>/</span><span class="st-total">총 ${total}명</span></div>
+      ${rows.length ? `<div class="st-days">${rows.map(r => `<a href="#" class="${r.day === day ? "on" : ""}" data-act="statsDay" data-day="${r.day}">${r.day.slice(5).replace("-", ".")} · ${r.visitors}명</a>`).join("")}</div>
+        ${statsChart(cur)}` : '<p class="st-empty">아직 기록이 없어요.</p>'}
+      <button class="st-csv" data-act="statsCsv">엑셀로 저장 (.csv)</button>`;
+    panel().hidden = false;
+  };
+  bind(ctx, {
+    statsOpen: async () => {
+      panel().hidden = false;
+      panel().innerHTML = '<p class="st-empty">불러오는 중…</p>';
+      try {
+        rows = await loadStats();
+        const today = vnNow().date;
+        day = rows.some(r => r.day === today) ? today : (rows.length ? rows[rows.length - 1].day : "");
+        draw();
+      } catch (e) { panel().innerHTML = '<button class="st-close" data-act="statsClose" aria-label="닫기">' + icon("close") + '</button><p class="st-empty">통계를 불러오지 못했어요. Firebase 보안 규칙을 확인해 주세요.</p>'; }
+    },
+    statsClose: () => { panel().hidden = true; },
+    statsDay: d => { day = d.day; draw(); },
+    statsCsv: () => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([toCsv(rows)], { type: "text/csv;charset=utf-8" }));
+      a.download = `kish-trip-visitors-${vnNow().date.replaceAll("-", "")}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+  });
+}
+
+// 시간대별 방문자 꺾은선 (0~23시)
+function statsChart(r) {
+  const v = HOURS.map(h => Number(r && r.hours[h]) || 0);
+  const max = Math.max(1, ...v), W = 320, H = 150, top = 14, bot = 22;
+  const pt = v.map((n, i) => [i * W / 23, top + (H - top - bot) * (1 - n / max)]);
+  let d = `M${pt[0][0].toFixed(1)},${pt[0][1].toFixed(1)}`;
+  for (let i = 0; i < pt.length - 1; i++) {   // 부드러운 곡선 (catmull-rom)
+    const p0 = pt[i - 1] || pt[i], p1 = pt[i], p2 = pt[i + 1], p3 = pt[i + 2] || p2;
+    const y = n => Math.min(H - bot, Math.max(top, n));   // 곡선이 축 아래로 내려가지 않게
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, y(p1[1] + (p2[1] - p0[1]) / 6)], c2 = [p2[0] - (p3[0] - p1[0]) / 6, y(p2[1] - (p3[1] - p1[1]) / 6)];
+    d += ` C${c1.map(n => n.toFixed(1)).join(",")} ${c2.map(n => n.toFixed(1)).join(",")} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+  }
+  const peak = v.indexOf(Math.max(...v));
+  return `<svg class="st-chart" viewBox="-6 0 ${W + 12} ${H}" role="img" aria-label="시간대별 방문자 수">
+    <line x1="0" y1="${H - bot}" x2="${W}" y2="${H - bot}" class="axis"/>
+    <path class="line" d="${d}"/>
+    ${v[peak] ? `<circle cx="${pt[peak][0]}" cy="${pt[peak][1]}" r="3.5" class="peak"/><text x="${pt[peak][0]}" y="${pt[peak][1] - 7}" text-anchor="middle">${peak}시 ${v[peak]}명</text>` : ""}
+    ${[0, 6, 12, 18, 23].map(h => `<text x="${h * W / 23}" y="${H - 6}" text-anchor="middle" class="tick">${h}시</text>`).join("")}
+  </svg>`;
 }
 
 /* ---------- 일정 ---------- */
@@ -539,21 +599,18 @@ export function pageQuiz(ctx) {
   ctx.leave(S.watchScores(list => { scores = list; const el = $("#rank"); if (el) el.innerHTML = rankHtml(); }));
 }
 
-/* ---------- 포토존 (사진은 패들렛에) ---------- */
+/* ---------- 지원단 인스타그램 (예전 포토존) ---------- */
 export function pagePhoto(ctx) {
-  const link = safeUrl(padletLink());
   page(ctx, `
-    <div class="board"><div class="pol"><div class="ph">${icon("cam")}반별 사진은 패들렛에</div>
-      <p>반별로 주제에 맞는 사진을 올려주세요.<br>수학여행이 끝나고 베스트 포토상을 뽑아요.</p></div></div>
-    ${link ? `<a class="pbtn" href="${esc(link)}" target="_blank" rel="noopener">패들렛에서 사진 올리기 ${icon("out")}</a>` : '<span class="pbtn off">패들렛 링크 준비 중이에요</span>'}
-    ${ed() ? `<div class="row" style="justify-content:center;margin-top:12px">${pen("editPadlet")}</div>` : ""}`, {
-    editPadlet: () => openForm({
-      title: "패들렛 링크 수정",
-      fields: [{ k: "padlet", label: "패들렛 주소 (비우면 '준비 중'으로 보여요)", ph: "https://padlet.com/..." }],
-      values: { padlet: padletLink() },
-      onSave: v => save("settings", { ...settingsForSave(), padlet: v.padlet })
-    })
-  });
+    <section class="ig">
+      <p class="eyebrow">수학여행 지원단 인스타그램</p>
+      <div class="ig-card">
+        <img class="ig-qr" src="${INSTAGRAM.qr}" alt="인스타그램 ${INSTAGRAM.id} QR 코드">
+        <a class="ig-id" href="${INSTAGRAM.url}" target="_blank" rel="noopener">@${INSTAGRAM.id}</a>
+      </div>
+      <p class="ig-txt">반별 사진과 수학여행 소식을 올려요.<br>QR을 찍거나 아래 버튼을 눌러 팔로우해 주세요.</p>
+      <a class="ig-go" href="${INSTAGRAM.url}" target="_blank" rel="noopener">인스타그램에서 보기 ${icon("out")}</a>
+    </section>`);
 }
 
 /* ---------- 쌤 소개 ---------- */
