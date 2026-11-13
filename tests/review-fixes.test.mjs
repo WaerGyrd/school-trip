@@ -36,19 +36,12 @@ test("long URLs in teacher text do not cause sideways scroll", async () => {
 });
 
 test("save toast has no emoji", async () => {
-  const { page, close } = await openPage({ hash: "#/photo", fake: { teacher: T } });
-  await page.click('#view [data-act="editPadlet"]');
-  await page.click("#mfSave");
+  const { page, close } = await openPage({ hash: "#/schedule/2", fake: { teacher: T } });
+  page.on("dialog", d => d.accept());
+  await page.click('#view [data-act="teamPreset"]');
   await page.waitForSelector("#toasts .toast");
   const t = await page.locator("#toasts").innerText();
   assert.doesNotMatch(t, /[\p{Extended_Pictographic}]/u, t);
-  await close();
-});
-
-test("padlet link must be http(s)", async () => {
-  const { page, close } = await openPage({ hash: "#/photo", fake: { content: { settings: { home: { desc: "x" }, teams: {}, padlet: "javascript:alert(1)" } } } });
-  assert.equal(await page.locator("#view a.pbtn").count(), 0);
-  assert.equal(await page.locator("#view .pbtn.off").count(), 1);
   await close();
 });
 

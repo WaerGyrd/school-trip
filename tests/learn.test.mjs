@@ -37,8 +37,7 @@ test("laptop shows first answer on the right", async () => {
 test("back icon closes the answer", async () => {
   const { page, close } = await openPage({ hash: "#/learn/1/2" });
   await page.click("#view .exp .back");
-  await page.waitForFunction(() => location.hash === "#/learn/1");
-  assert.equal(await page.locator("#view .exp").count(), 0);
+  await page.waitForFunction(() => location.hash === "#/learn/1" && !document.querySelector("#view .exp"), null, { timeout: 3000 });
   await close();
 });
 
