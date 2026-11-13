@@ -1,6 +1,7 @@
-import { $, $$, esc, ls, toast, beep } from "./util.js?v=20261113a";
-import * as S from "./store.js?v=20261113a";
-import * as P from "./pages.js?v=20261113a";
+import { $, $$, esc, ls, toast, beep } from "./util.js?v=20261113b";
+import * as S from "./store.js?v=20261113b";
+import * as P from "./pages.js?v=20261113b";
+import { recordVisit } from "./stats.js?v=20261113b";
 
 const PAGES = {
   home: P.pageHome, schedule: P.pageSchedule, route: P.pageRoute, notice: P.pageNotice,
@@ -141,6 +142,7 @@ function toggleEdit() {
 }
 function syncEditSwitch() {
   const t = !!S.state.teacher;
+  document.body.classList.toggle("teacher", t);
   $$(".edit-switch").forEach(el => { el.hidden = !t; });
   $$("[data-toggle-edit]").forEach(b => b.setAttribute("aria-checked", String(!!S.state.editMode)));
 }
@@ -202,3 +204,4 @@ view.innerHTML = '<div class="empty">불러오는 중…</div>';
 drawerExtra();
 adminBar();
 S.init();
+recordVisit();
