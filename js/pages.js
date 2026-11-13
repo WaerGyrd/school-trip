@@ -1,8 +1,8 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261113a";
-import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261113a";
-import * as S from "./store.js?v=20261113a";
-import { icon } from "./icons.js?v=20261113a";
-import { pickRound } from "./quiz.js?v=20261113a";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261113c";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261113c";
+import * as S from "./store.js?v=20261113c";
+import { icon } from "./icons.js?v=20261113c";
+import { pickRound } from "./quiz.js?v=20261113c";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -547,7 +547,7 @@ export function pagePhoto(ctx) {
         <img class="ig-qr" src="${INSTAGRAM.qr}" alt="인스타그램 ${INSTAGRAM.id} QR 코드">
         <a class="ig-id" href="${INSTAGRAM.url}" target="_blank" rel="noopener">@${INSTAGRAM.id}</a>
       </div>
-      <p class="ig-txt">반별 사진과 수학여행 소식을 올려요.<br>QR을 찍거나 아래 버튼을 눌러 팔로우해 주세요.</p>
+      <p class="ig-txt"><b>수학여행 일정과 이벤트가 여기서 공지됩니다.</b><br>QR을 찍거나 아래 버튼을 눌러 팔로우해 주세요.</p>
       <a class="ig-go" href="${INSTAGRAM.url}" target="_blank" rel="noopener">인스타그램에서 보기 ${icon("out")}</a>
     </section>`);
 }

@@ -355,5 +355,6 @@ body.editing .home .dev { bottom: 54px; }
 .ig-card { background: #fff; border-radius: 18px; padding: 18px 18px 14px; margin: 12px auto 0; width: min(100%, 340px); }
 .ig-qr { display: block; width: 100%; height: auto; }
 .ig-id { display: block; margin-top: 8px; font-family: "A2Z"; font-size: 22px; color: var(--ink); text-decoration: none; }
-.ig-txt { color: var(--mute); font-size: 14px; margin: 16px 0 0; }
+.ig-txt { color: var(--mute); font-size: 14px; margin: 16px 0 0; line-height: 1.7; }
+.ig-txt b { color: var(--tx); font-family: "A2Z"; font-size: 16px; font-weight: 700; }
 .ig-go { display: flex; align-items: center; justify-content: center; gap: 6px; width: min(100%, 340px); margin: 18px auto 0; padding: 15px; border-radius: 12px; background: var(--tx); color: var(--ink); font-family: "A2Z"; font-size: 17px; text-decoration: none; }
