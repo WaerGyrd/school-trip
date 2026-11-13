@@ -1,9 +1,9 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261113e";
-import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261113e";
-import * as S from "./store.js?v=20261113e";
-import { icon } from "./icons.js?v=20261113e";
-import { pickRound } from "./quiz.js?v=20261113e";
-import { loadStats, toCsv, HOURS } from "./stats.js?v=20261113e";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261113f";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261113f";
+import * as S from "./store.js?v=20261113f";
+import { icon } from "./icons.js?v=20261113f";
+import { pickRound } from "./quiz.js?v=20261113f";
+import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261113f";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -74,19 +74,17 @@ export function pageHome(ctx) {
       <button class="stats-pill" data-act="statsOpen">${icon("user")}오늘 방문자 수 / 총 방문자 수</button>
       <div class="stats-panel" hidden></div>
     </section>`;
-  let rows = [], day = "";
+  let rows = [];
   const panel = () => ctx.view.querySelector(".stats-panel");
   const draw = () => {
     const today = vnNow().date;
     const todayN = (rows.find(r => r.day === today) || {}).visitors || 0;
     const total = rows.reduce((a, r) => a + r.visitors, 0);
-    const cur = rows.find(r => r.day === day);
     panel().innerHTML = `
       <button class="st-close" data-act="statsClose" aria-label="닫기">${icon("close")}</button>
       <div class="st-hd">오늘 방문자 수 / 총 방문자 수</div>
       <div class="st-num"><b class="st-today">${todayN}명</b><span>/</span><span class="st-total">총 ${total}명</span></div>
-      ${rows.length ? `<div class="st-days">${rows.map(r => `<a href="#" class="${r.day === day ? "on" : ""}" data-act="statsDay" data-day="${r.day}">${r.day.slice(5).replace("-", ".")} · ${r.visitors}명</a>`).join("")}</div>
-        ${statsChart(cur)}` : '<p class="st-empty">아직 기록이 없어요.</p>'}
+      ${rows.length ? statsTable(rows) : '<p class="st-empty">아직 기록이 없어요.</p>'}
       <button class="st-csv" data-act="statsCsv">엑셀로 저장 (.csv)</button>`;
     panel().hidden = false;
   };
@@ -96,13 +94,10 @@ export function pageHome(ctx) {
       panel().innerHTML = '<p class="st-empty">불러오는 중…</p>';
       try {
         rows = await loadStats();
-        const today = vnNow().date;
-        day = rows.some(r => r.day === today) ? today : (rows.length ? rows[rows.length - 1].day : "");
         draw();
       } catch (e) { panel().innerHTML = '<button class="st-close" data-act="statsClose" aria-label="닫기">' + icon("close") + '</button><p class="st-empty">통계를 불러오지 못했어요. Firebase 보안 규칙을 확인해 주세요.</p>'; }
     },
     statsClose: () => { panel().hidden = true; },
-    statsDay: d => { day = d.day; draw(); },
     statsCsv: () => {
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([toCsv(rows)], { type: "text/csv;charset=utf-8" }));
@@ -113,25 +108,22 @@ export function pageHome(ctx) {
   });
 }
 
-// 시간대별 방문자 꺾은선 (0~23시)
-function statsChart(r) {
-  const v = HOURS.map(h => Number(r && r.hours[h]) || 0);
-  const max = Math.max(1, ...v), W = 320, H = 150, top = 14, bot = 22;
-  const pt = v.map((n, i) => [i * W / 23, top + (H - top - bot) * (1 - n / max)]);
-  let d = `M${pt[0][0].toFixed(1)},${pt[0][1].toFixed(1)}`;
-  for (let i = 0; i < pt.length - 1; i++) {   // 부드러운 곡선 (catmull-rom)
-    const p0 = pt[i - 1] || pt[i], p1 = pt[i], p2 = pt[i + 1], p3 = pt[i + 2] || p2;
-    const y = n => Math.min(H - bot, Math.max(top, n));   // 곡선이 축 아래로 내려가지 않게
-    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, y(p1[1] + (p2[1] - p0[1]) / 6)], c2 = [p2[0] - (p3[0] - p1[0]) / 6, y(p2[1] - (p3[1] - p1[1]) / 6)];
-    d += ` C${c1.map(n => n.toFixed(1)).join(",")} ${c2.map(n => n.toFixed(1)).join(",")} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
-  }
-  const peak = v.indexOf(Math.max(...v));
-  return `<svg class="st-chart" viewBox="-6 0 ${W + 12} ${H}" role="img" aria-label="시간대별 방문자 수">
-    <line x1="0" y1="${H - bot}" x2="${W}" y2="${H - bot}" class="axis"/>
-    <path class="line" d="${d}"/>
-    ${v[peak] ? `<circle cx="${pt[peak][0]}" cy="${pt[peak][1]}" r="3.5" class="peak"/><text x="${pt[peak][0]}" y="${pt[peak][1] - 7}" text-anchor="middle">${peak}시 ${v[peak]}명</text>` : ""}
-    ${[0, 6, 12, 18, 23].map(h => `<text x="${h * W / 23}" y="${H - 6}" text-anchor="middle" class="tick">${h}시</text>`).join("")}
-  </svg>`;
+// 날짜(줄) × 0~23시(칸) 표: 진할수록 많이 온 시간, 칸 안에 사람 수
+const HEAT = ["#FBE3E1", "#F6C1BD", "#EF958F", "#E86D66", "#D9443B"];
+function statsTable(rows) {
+  const max = Math.max(1, ...rows.flatMap(r => HOURS.map(h => Number(r.hours[h]) || 0)));
+  const shade = n => n ? HEAT[Math.min(4, Math.floor(n / max * 5 - 1e-9))] : "#F4F4F2";
+  let peak = null;
+  for (const r of rows) { const p = peakOf(r); if (p && (!peak || p.n > peak.n)) peak = { ...p, day: r.day }; }
+  const md = d => d.slice(5).replace("-", ".");
+  return `<table class="st-hm">
+    <thead><tr><th></th>${HOURS.map(h => `<th>${Number(h) % 3 === 0 ? Number(h) : ""}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(r => `<tr><th>${md(r.day)}<b>${r.visitors}명</b></th>${HOURS.map(h => {
+      const n = Number(r.hours[h]) || 0;
+      return `<td style="background:${shade(n)}" class="${n / max > 0.6 ? "dark" : ""}" title="${md(r.day)} ${Number(h)}시 ${n}명">${n || ""}</td>`;
+    }).join("")}</tr>`).join("")}</tbody>
+  </table>
+  <div class="st-legend">적음 ${HEAT.map(c => `<i style="background:${c}"></i>`).join("")} 많음${peak ? `<span class="st-peak">가장 붐빈 시간: ${md(peak.day)} ${Number(peak.h)}시 ${peak.n}명</span>` : ""}</div>`;
 }
 
 /* ---------- 일정 ---------- */

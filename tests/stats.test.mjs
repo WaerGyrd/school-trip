@@ -32,17 +32,20 @@ test("students and phones never see the stats", async () => {
   await close();
 });
 
-test("teacher on laptop opens today/total with an hourly chart", async () => {
+test("teacher on laptop sees a date × hour table", async () => {
   const { page, close } = await openPage({ hash: "#/", ...LAP, fake: { teacher: T, stats: STATS } });
   await page.locator("#view .stats-pill").click();
   const panel = page.locator("#view .stats-panel");
   await panel.waitFor();
-  const t = await panel.innerText();
-  assert.match(t, /오늘 방문자 수 \/ 총 방문자 수/);
+  assert.match(await panel.innerText(), /오늘 방문자 수 \/ 총 방문자 수/);
   assert.match(await panel.locator(".st-today").innerText(), /^12명$/);
   assert.match(await panel.locator(".st-total").innerText(), /42명/);
-  assert.equal(await panel.locator("svg.st-chart path.line").count(), 1);
-  assert.equal(await panel.locator(".st-days a").count(), 2);
+  const rows = panel.locator("table.st-hm tbody tr");
+  assert.equal(await rows.count(), 2, "one row per day");
+  assert.equal(await rows.nth(0).locator("td").count(), 24, "24 hours");
+  assert.equal((await rows.nth(1).locator("td").nth(9).innerText()).trim(), "5");
+  assert.match(await rows.nth(0).locator("th").innerText(), /11\.11[\s\S]*30명/);
+  assert.match(await panel.locator(".st-peak").innerText(), /가장 붐빈 시간: 11\.11 20시 9명/);
   await close();
 });
 
@@ -54,9 +57,11 @@ test("excel export lists every day and hour", async () => {
   assert.match(dl.suggestedFilename(), /^kish-trip-visitors-\d{8}\.csv$/);
   const csv = fs.readFileSync(await dl.path(), "utf8");
   assert.ok(csv.startsWith("﻿"), "BOM so Excel reads Korean");
-  assert.match(csv, /날짜,방문자 수\r?\n2026-11-11,30/);
-  assert.match(csv, /날짜,시간,방문자 수/);
-  assert.match(csv, new RegExp(`${today},09시,5`));
-  assert.match(csv, /2026-11-11,13시,0/);
+  const lines = csv.replace("\uFEFF", "").split(/\r?\n/);
+  assert.ok(lines.includes("날짜,방문자 수,가장 붐빈 시간,그 시간 방문자"));
+  assert.ok(lines.includes("2026-11-11,30,20시,9"));
+  assert.ok(lines.includes("날짜," + Array.from({ length: 24 }, (_, h) => h + "시").join(",")));
+  const row = lines.find(l => l.startsWith(today + ",") && l.split(",").length === 25).split(",");
+  assert.equal(row[1 + 9], "5"); assert.equal(row[1 + 10], "7"); assert.equal(row[1 + 13], "0");
   await close();
 });
