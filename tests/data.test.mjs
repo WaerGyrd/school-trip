@@ -52,3 +52,9 @@ test("schedule follows the 2026-235 family letter", () => {
   assert.match(find(d3, "15:00").desc, /햄버거/);
   assert.match(d3.info, /박물관 1곳만/);
 });
+
+test("every route has its measured time and distance", () => {
+  for (const r of DEFAULTS.routes) { assert.ok(r.time && r.dist, r.title); assert.equal(r.todo, false, r.title); }
+  const air = DEFAULTS.routes.filter(r => r.day === 3 && r.toQ === "Tan Son Nhat International Airport");
+  assert.deepEqual(air.map(r => [r.time, r.dist]), [["20분", "7.2 km"], ["15분", "5.5 km"]]);
+});
