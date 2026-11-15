@@ -64,19 +64,20 @@ export const DEFAULTS = {
 
   // dep: 출발 시간 / fromQ, toQ: 구글맵 검색어 또는 "위도,경도" / time, dist 가 비어 있으면 "확인 중"
   routes: [
-    { day: 1, dep: "11:10", title: "공항 → 아리랑 식당", fromQ: "Tan Son Nhat International Airport", toQ: "Arirang Korean restaurant Ho Chi Minh City", time: "", dist: "", note: "", todo: true, img: "" },
-    { day: 1, dep: "13:00", title: "아리랑 식당 → 통일궁", fromQ: "Arirang Korean restaurant Ho Chi Minh City", toQ: "Reunification Palace Ho Chi Minh City", time: "", dist: "", note: "", todo: true, img: "" },
-    { day: 1, dep: "14:00", title: "통일궁 → 하버 식당", fromQ: "Reunification Palace Ho Chi Minh City", toQ: "10.4711464,107.3982098", time: "", dist: "", note: "하버 식당은 에메랄드 호짬 리조트 안에 있어요.", todo: false, img: "" },
-    { day: 2, dep: "08:30", title: "호텔 → 땀탕 광장", fromQ: "Holiday Inn Resort Ho Tram Beach", toQ: "10.3455555,107.097283", time: "", dist: "", note: "", todo: false, img: "" },
-    { day: 2, dep: "10:30", title: "A팀 · 땀탕 광장 → 선월드", fromQ: "10.3455555,107.097283", toQ: "Sun World Vung Tau", time: "", dist: "", note: "", todo: true, img: "" },
-    { day: 2, dep: "10:30", title: "B팀 · 땀탕 광장 → 시내 투어", fromQ: "10.3455555,107.097283", toQ: "Statue of Jesus Christ Vung Tau", time: "", dist: "", note: "예수상 · 화이트 팰리스 · 바이저우 성모 성지 순서는 현장에서 안내해요.", todo: false, img: "" },
-    { day: 2, dep: "16:00", title: "A팀 · 선월드 → 호텔", fromQ: "Sun World Vung Tau", toQ: "Holiday Inn Resort Ho Tram Beach", time: "", dist: "", note: "", todo: true, img: "" },
-    { day: 2, dep: "16:00", title: "B팀 · 시내 → 호텔", fromQ: "Statue of Jesus Christ Vung Tau", toQ: "Holiday Inn Resort Ho Tram Beach", time: "", dist: "", note: "", todo: false, img: "" },
-    { day: 3, dep: "08:00", title: "호텔 → 송빈 성당", fromQ: "Holiday Inn Resort Ho Tram Beach", toQ: "10.5713214,107.0557317", time: "", dist: "", note: "", todo: false, img: "" },
-    { day: 3, dep: "10:30", title: "송빈 성당 → 강남BBQ · 미각", fromQ: "10.5713214,107.0557317", toQ: "10.7330398,106.7082962", time: "", dist: "", note: "두 식당이 붙어 있어요. 3개 반씩 나눠 들어가요.", todo: false, img: "" },
-    { day: 3, dep: "13:00", title: "A팀 · 전쟁 박물관 → 역사 박물관", fromQ: "War Remnants Museum Ho Chi Minh City", toQ: "Museum of Vietnamese History Ho Chi Minh City", time: "", dist: "", note: "10-1·2·3반", todo: false, img: "" },
-    { day: 3, dep: "13:00", title: "B팀 · 역사 박물관 → 전쟁 박물관", fromQ: "Museum of Vietnamese History Ho Chi Minh City", toQ: "War Remnants Museum Ho Chi Minh City", time: "", dist: "", note: "10-4·5·6반", todo: false, img: "" },
-    { day: 3, dep: "15:00", title: "박물관 → 공항", fromQ: "War Remnants Museum Ho Chi Minh City", toQ: "Tan Son Nhat International Airport", time: "", dist: "", note: "공항에서 대기하며 햄버거가 제공돼요.", todo: false, img: "" }
+    { day: 1, dep: "11:10", title: "공항 → 아리랑 식당", fromQ: "Tan Son Nhat International Airport", toQ: "Arirang Korean restaurant Ho Chi Minh City", time: "27~29분", dist: "8.4 km", note: "", todo: false, img: "" },
+    { day: 1, dep: "13:00", title: "아리랑 식당 → 통일궁", fromQ: "Arirang Korean restaurant Ho Chi Minh City", toQ: "Reunification Palace Ho Chi Minh City", time: "8~9분", dist: "2.0 km", note: "", todo: false, img: "" },
+    { day: 1, dep: "14:00", title: "통일궁 → 하버 식당", fromQ: "Reunification Palace Ho Chi Minh City", toQ: "10.4711464,107.3982098", time: "2시간 9분", dist: "113 km", note: "하버 식당은 에메랄드 호짬 리조트 안에 있어요.", todo: false, img: "" },
+    { day: 2, dep: "08:30", title: "호텔 → 땀탕 광장", fromQ: "Holiday Inn Resort Ho Tram Beach", toQ: "10.3455555,107.097283", time: "1시간 4분", dist: "50.8 km", note: "", todo: false, img: "" },
+    { day: 2, dep: "10:30", title: "A팀 · 땀탕 광장 → 선월드", fromQ: "10.3455555,107.097283", toQ: "Sun World Vung Tau", time: "15분", dist: "8.9 km", note: "", todo: false, img: "" },
+    { day: 2, dep: "10:30", title: "B팀 · 땀탕 광장 → 시내 투어", fromQ: "10.3455555,107.097283", toQ: "Statue of Jesus Christ Vung Tau", time: "6분", dist: "2.9 km", note: "예수상 · 화이트 팰리스 · 바이저우 성모 성지 순서는 현장에서 안내해요.", todo: false, img: "" },
+    { day: 2, dep: "16:00", title: "A팀 · 선월드 → 호텔", fromQ: "Sun World Vung Tau", toQ: "Holiday Inn Resort Ho Tram Beach", time: "1시간", dist: "44.6 km", note: "", todo: false, img: "" },
+    { day: 2, dep: "16:00", title: "B팀 · 시내 → 호텔", fromQ: "Statue of Jesus Christ Vung Tau", toQ: "Holiday Inn Resort Ho Tram Beach", time: "1시간 11분", dist: "53.3 km", note: "", todo: false, img: "" },
+    { day: 3, dep: "08:00", title: "호텔 → 송빈 성당", fromQ: "Holiday Inn Resort Ho Tram Beach", toQ: "10.5713214,107.0557317", time: "1시간 7분", dist: "54.7 km", note: "", todo: false, img: "" },
+    { day: 3, dep: "10:30", title: "송빈 성당 → 강남BBQ · 미각", fromQ: "10.5713214,107.0557317", toQ: "10.7330398,106.7082962", time: "1시간 12분", dist: "61.8 km", note: "두 식당이 붙어 있어요. 3개 반씩 나눠 들어가요.", todo: false, img: "" },
+    { day: 3, dep: "13:00", title: "A팀 · 전쟁 박물관 → 역사 박물관", fromQ: "War Remnants Museum Ho Chi Minh City", toQ: "Museum of Vietnamese History Ho Chi Minh City", time: "7분", dist: "1.9 km", note: "10-1·2·3반", todo: false, img: "" },
+    { day: 3, dep: "13:00", title: "B팀 · 역사 박물관 → 전쟁 박물관", fromQ: "Museum of Vietnamese History Ho Chi Minh City", toQ: "War Remnants Museum Ho Chi Minh City", time: "8분", dist: "2.1 km", note: "10-4·5·6반", todo: false, img: "" },
+    { day: 3, dep: "15:00", title: "A팀 · 역사 박물관 → 공항", fromQ: "Museum of Vietnamese History Ho Chi Minh City", toQ: "Tan Son Nhat International Airport", time: "20분", dist: "7.2 km", note: "공항에서 대기하며 햄버거가 제공돼요.", todo: false, img: "" },
+    { day: 3, dep: "15:00", title: "B팀 · 전쟁 박물관 → 공항", fromQ: "War Remnants Museum Ho Chi Minh City", toQ: "Tan Son Nhat International Airport", time: "15분", dist: "5.5 km", note: "공항에서 대기하며 햄버거가 제공돼요.", todo: false, img: "" }
   ],
 
   // when: 언제 가는지 / label: "○○, 박물관 가기 전 딱 N가지만 알자!" 의 ○○

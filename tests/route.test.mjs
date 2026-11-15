@@ -43,7 +43,8 @@ test("place-check badge only in edit mode", async () => {
   let { page, close } = await openPage({ hash: "#/route/1" });
   assert.doesNotMatch(await page.locator("#view").innerText(), /장소 확인 필요/);
   await close();
-  ({ page, close } = await openPage({ hash: "#/route/1", fake: { teacher: { name: "김", classNo: 0 } } }));
+  const routes = DEFAULTS.routes.map((r, i) => i === 0 ? { ...r, todo: true } : r);
+  ({ page, close } = await openPage({ hash: "#/route/1", fake: { teacher: { name: "김", classNo: 0 }, content: { routes } } }));
   await page.waitForSelector("#view .b-todo");
   await close();
 });
