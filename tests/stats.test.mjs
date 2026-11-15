@@ -32,20 +32,45 @@ test("students and phones never see the stats", async () => {
   await close();
 });
 
-test("teacher on laptop sees a date × hour table", async () => {
+test("today tab: today's count and today's hours", async () => {
   const { page, close } = await openPage({ hash: "#/", ...LAP, fake: { teacher: T, stats: STATS } });
   await page.locator("#view .stats-pill").click();
   const panel = page.locator("#view .stats-panel");
   await panel.waitFor();
-  assert.match(await panel.innerText(), /오늘 방문자 수 \/ 총 방문자 수/);
-  assert.match(await panel.locator(".st-today").innerText(), /^12명$/);
-  assert.match(await panel.locator(".st-total").innerText(), /42명/);
+  const tabs = panel.locator(".st-tabs button");
+  assert.deepEqual((await tabs.allInnerTexts()).map(t => t.trim()), ["오늘 방문자 수", "총 방문자 수"]);
+  assert.equal(await tabs.nth(0).getAttribute("aria-selected"), "true");
+  assert.equal((await panel.locator(".st-big").innerText()).trim(), "12명");
+  const rows = panel.locator("table.st-hm tbody tr");
+  assert.equal(await rows.count(), 1, "only today");
+  assert.equal(await rows.nth(0).locator("td").count(), 24);
+  assert.equal((await rows.nth(0).locator("td").nth(9).innerText()).trim(), "5");
+  assert.match(await panel.locator(".st-peak").innerText(), /가장 붐빈 시간: 10시 7명/);
+  await close();
+});
+
+test("total tab: total count and date × hour table", async () => {
+  const { page, close } = await openPage({ hash: "#/", ...LAP, fake: { teacher: T, stats: STATS } });
+  await page.locator("#view .stats-pill").click();
+  const panel = page.locator("#view .stats-panel");
+  await panel.waitFor();
+  await panel.locator(".st-tabs button", { hasText: "총 방문자 수" }).click();
+  assert.equal(await panel.locator(".st-tabs button").nth(1).getAttribute("aria-selected"), "true");
+  assert.equal((await panel.locator(".st-big").innerText()).trim(), "42명");
   const rows = panel.locator("table.st-hm tbody tr");
   assert.equal(await rows.count(), 2, "one row per day");
-  assert.equal(await rows.nth(0).locator("td").count(), 24, "24 hours");
-  assert.equal((await rows.nth(1).locator("td").nth(9).innerText()).trim(), "5");
   assert.match(await rows.nth(0).locator("th").innerText(), /11\.11[\s\S]*30명/);
   assert.match(await panel.locator(".st-peak").innerText(), /가장 붐빈 시간: 11\.11 20시 9명/);
+  await close();
+});
+
+test("today tab with no visits yet says so", async () => {
+  const { page, close } = await openPage({ hash: "#/", ...LAP, fake: { teacher: T, stats: { "2026-11-11": STATS["2026-11-11"] } } });
+  await page.locator("#view .stats-pill").click();
+  const panel = page.locator("#view .stats-panel");
+  await panel.waitFor();
+  assert.equal((await panel.locator(".st-big").innerText()).trim(), "0명");
+  assert.match(await panel.innerText(), /오늘은 아직 방문 기록이 없어요/);
   await close();
 });
 

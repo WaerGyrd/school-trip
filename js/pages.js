@@ -1,9 +1,9 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261113f";
-import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261113f";
-import * as S from "./store.js?v=20261113f";
-import { icon } from "./icons.js?v=20261113f";
-import { pickRound } from "./quiz.js?v=20261113f";
-import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261113f";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261115a";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261115a";
+import * as S from "./store.js?v=20261115a";
+import { icon } from "./icons.js?v=20261115a";
+import { pickRound } from "./quiz.js?v=20261115a";
+import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261115a";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -74,17 +74,27 @@ export function pageHome(ctx) {
       <button class="stats-pill" data-act="statsOpen">${icon("user")}오늘 방문자 수 / 총 방문자 수</button>
       <div class="stats-panel" hidden></div>
     </section>`;
-  let rows = [];
+  let rows = [], tab = "today";
   const panel = () => ctx.view.querySelector(".stats-panel");
+  const md = d => d.slice(5).replace("-", ".");
   const draw = () => {
     const today = vnNow().date;
-    const todayN = (rows.find(r => r.day === today) || {}).visitors || 0;
-    const total = rows.reduce((a, r) => a + r.visitors, 0);
+    const todayRow = rows.find(r => r.day === today);
+    const n = tab === "today" ? (todayRow ? todayRow.visitors : 0) : rows.reduce((a, r) => a + r.visitors, 0);
+    const sub = tab === "today" ? `${md(today)} 하루 동안 사이트를 연 사람 수`
+      : rows.length ? `${md(rows[0].day)} ~ ${md(rows[rows.length - 1].day)} · ${rows.length}일 동안 날마다 센 방문자 수의 합` : "";
+    const body = tab === "today"
+      ? (todayRow ? statsTable([todayRow]) : '<p class="st-empty">오늘은 아직 방문 기록이 없어요.</p>')
+      : (rows.length ? statsTable(rows) : '<p class="st-empty">아직 기록이 없어요.</p>');
     panel().innerHTML = `
       <button class="st-close" data-act="statsClose" aria-label="닫기">${icon("close")}</button>
-      <div class="st-hd">오늘 방문자 수 / 총 방문자 수</div>
-      <div class="st-num"><b class="st-today">${todayN}명</b><span>/</span><span class="st-total">총 ${total}명</span></div>
-      ${rows.length ? statsTable(rows) : '<p class="st-empty">아직 기록이 없어요.</p>'}
+      <div class="st-tabs" role="tablist">
+        <button role="tab" aria-selected="${tab === "today"}" data-act="statsTab" data-tab="today">오늘 방문자 수</button>
+        <button role="tab" aria-selected="${tab === "total"}" data-act="statsTab" data-tab="total">총 방문자 수</button>
+      </div>
+      <div class="st-big">${n}명</div>
+      <p class="st-sub">${sub}</p>
+      ${body}
       <button class="st-csv" data-act="statsCsv">엑셀로 저장 (.csv)</button>`;
     panel().hidden = false;
   };
@@ -98,6 +108,7 @@ export function pageHome(ctx) {
       } catch (e) { panel().innerHTML = '<button class="st-close" data-act="statsClose" aria-label="닫기">' + icon("close") + '</button><p class="st-empty">통계를 불러오지 못했어요. Firebase 보안 규칙을 확인해 주세요.</p>'; }
     },
     statsClose: () => { panel().hidden = true; },
+    statsTab: d => { tab = d.tab; draw(); },
     statsCsv: () => {
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([toCsv(rows)], { type: "text/csv;charset=utf-8" }));
@@ -123,7 +134,7 @@ function statsTable(rows) {
       return `<td style="background:${shade(n)}" class="${n / max > 0.6 ? "dark" : ""}" title="${md(r.day)} ${Number(h)}시 ${n}명">${n || ""}</td>`;
     }).join("")}</tr>`).join("")}</tbody>
   </table>
-  <div class="st-legend">적음 ${HEAT.map(c => `<i style="background:${c}"></i>`).join("")} 많음${peak ? `<span class="st-peak">가장 붐빈 시간: ${md(peak.day)} ${Number(peak.h)}시 ${peak.n}명</span>` : ""}</div>`;
+  <div class="st-legend">적음 ${HEAT.map(c => `<i style="background:${c}"></i>`).join("")} 많음${peak ? `<span class="st-peak">가장 붐빈 시간: ${rows.length > 1 ? md(peak.day) + " " : ""}${Number(peak.h)}시 ${peak.n}명</span>` : ""}</div>`;
 }
 
 /* ---------- 일정 ---------- */
