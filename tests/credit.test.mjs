@@ -27,3 +27,9 @@ test("PC editing: stats button and credit don't collide", async () => {
   if (bar && bar.height) assert.ok(dev.y + dev.height <= bar.y);
   await t.close();
 });
+
+test("edit bar says only '선생님', never the account name", async () => {
+  const t = await openPage({ hash: "#/", fake: { teacher: { name: "홍길동", classNo: 0 } } });
+  assert.equal((await t.page.locator("#adminText").innerText()).trim(), "편집 모드 켜짐 · 선생님");
+  await t.close();
+});
