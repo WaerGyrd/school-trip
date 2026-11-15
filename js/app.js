@@ -1,7 +1,7 @@
-import { $, $$, esc, ls, toast, beep } from "./util.js?v=20261115c";
-import * as S from "./store.js?v=20261115c";
-import * as P from "./pages.js?v=20261115c";
-import { recordVisit } from "./stats.js?v=20261115c";
+import { $, $$, esc, ls, toast, beep } from "./util.js?v=20261115d";
+import * as S from "./store.js?v=20261115d";
+import * as P from "./pages.js?v=20261115d";
+import { recordVisit } from "./stats.js?v=20261115d";
 
 const PAGES = {
   home: P.pageHome, schedule: P.pageSchedule, route: P.pageRoute, notice: P.pageNotice,
@@ -130,7 +130,7 @@ function adminBar() {
   const t = S.state.teacher;
   $("#adminbar").hidden = !(t && S.state.editMode);   // 편집 모드가 켜져 있을 때만 아래 띠 표시
   document.body.classList.toggle("editing", !!(t && S.state.editMode));
-  if (t) $("#adminText").textContent = `편집 모드 켜짐 · ${t.name} 선생님`;
+  if (t) $("#adminText").textContent = "편집 모드 켜짐 · 선생님";
 }
 
 /* ---------- 편집 모드 스위치 (홈·메뉴·아래 띠) ---------- */
