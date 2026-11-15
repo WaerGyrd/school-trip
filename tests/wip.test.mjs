@@ -9,9 +9,7 @@ test("students see a 'coming soon' sign instead of the teacher cards", async () 
   const sign = page.locator("#view .wip-sign");
   assert.equal(await sign.count(), 1);
   assert.match(await sign.innerText(), /제작 중이에요/);
-  const art = page.locator("#view .wip-art img");
-  assert.equal(await art.getAttribute("src"), "assets/teachers-ppg.jpg");
-  assert.ok(await art.evaluate(i => i.complete && i.naturalWidth > 0), "illustration loads");
+  assert.equal(await page.locator("#view img").count(), 0, "sign only, no picture");
   assert.equal(await sign.evaluate(e => getComputedStyle(e).backgroundImage), "none", "no gradient");
   assert.ok(await noHorizontalScroll(page));
   assert.deepEqual(await textHasEmoji(page), []);
