@@ -142,7 +142,7 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
   .home .bub { position: absolute; top: 240px; right: 6%; margin: 0; }
   .bub p { max-width: 420px; font-size: 17px; }
   .home-edit { position: absolute; top: 200px; right: 6%; margin: 0; }
-  .home .dev { left: 40px; right: auto; text-align: left; bottom: 24px; font-size: 16px; }
+  .home .dev { left: 40px; right: auto; text-align: left; bottom: 28px; font-size: 22px; color: #fff; letter-spacing: .3px; }
 }
 
 /* ===== 일정 ===== */
@@ -325,6 +325,20 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
 /* ===== 쌤 소개 ===== */
 .intro { color: var(--mute); font-size: 14px; margin: 4px 0 0; }
 .tgrid { display: grid; gap: 12px; margin-top: 14px; }
+/* 준비 중 팻말 (학생 화면) */
+.wip { display: flex; flex-direction: column; align-items: center; padding: 48px 0 64px; }
+.wip-hang { position: relative; width: 200px; height: 70px; }
+.wip-hang::before, .wip-hang::after { content: ""; position: absolute; top: 6px; width: 2px; height: 86px; background: var(--mute); transform-origin: top center; }
+.wip-hang::before { left: 50%; transform: rotate(52deg); }
+.wip-hang::after { left: 50%; transform: rotate(-52deg); }
+.wip-hang i { position: absolute; left: 50%; top: 0; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--d3l); box-shadow: 0 0 0 3px var(--bg); z-index: 1; }
+.wip-sign { margin-top: -6px; width: min(300px, 86vw); background: var(--tx); color: var(--bg); border-radius: 12px; padding: 26px 20px 22px; text-align: center; display: flex; flex-direction: column; gap: 6px; box-shadow: inset 0 0 0 6px var(--tx), inset 0 0 0 8px var(--d3), 0 14px 30px rgba(0, 0, 0, .35); transform: rotate(-3deg); transform-origin: top center; animation: wip-swing 4s ease-in-out infinite; }
+.wip-en { font-size: 11px; letter-spacing: 4px; color: var(--d3); font-weight: 700; }
+.wip-sign strong { font-size: 30px; line-height: 1.2; letter-spacing: -.5px; }
+.wip-sub { font-size: 13px; color: #5B6170; }
+@keyframes wip-swing { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(2deg); } }
+@media (prefers-reduced-motion: reduce) { .wip-sign { animation: none; } }
+@media (min-width: 900px) { .wip { padding-top: 80px; } .wip-sign { width: 360px; } .wip-sign strong { font-size: 36px; } }
 .tc { border-radius: 14px; padding: 18px 20px; color: var(--ink); min-height: 120px; }
 .tc small { font-size: 12px; letter-spacing: 1px; }
 .tc h3 { font-size: 24px; margin: 4px 0 6px; }

@@ -1,9 +1,9 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261115a";
-import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261115a";
-import * as S from "./store.js?v=20261115a";
-import { icon } from "./icons.js?v=20261115a";
-import { pickRound } from "./quiz.js?v=20261115a";
-import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261115a";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261115b";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261115b";
+import * as S from "./store.js?v=20261115b";
+import { icon } from "./icons.js?v=20261115b";
+import { pickRound } from "./quiz.js?v=20261115b";
+import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261115b";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -628,6 +628,18 @@ const T_FIELDS = [
 ];
 
 export function pageTeachers(ctx) {
+  if (!S.isTeacher()) {
+    page(ctx, `
+      <div class="wip">
+        <div class="wip-hang" aria-hidden="true"><i></i></div>
+        <div class="wip-sign" role="status">
+          <span class="wip-en">COMING SOON</span>
+          <strong>준비 중이에요</strong>
+          <span class="wip-sub">선생님들 소개는 곧 열릴 예정이에요</span>
+        </div>
+      </div>`);
+    return;
+  }
   const list = S.get("teachers");
   page(ctx, `
     <p class="intro">10학년부 선생님들이 파워퍼프걸로 변신했어요!</p>
