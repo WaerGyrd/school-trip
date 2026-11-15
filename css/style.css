@@ -326,7 +326,7 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
 .intro { color: var(--mute); font-size: 14px; margin: 4px 0 0; }
 .tgrid { display: grid; gap: 12px; margin-top: 14px; }
 /* 준비 중 팻말 (학생 화면) */
-.wip { display: flex; flex-direction: column; align-items: center; padding: 36px 0 48px; }
+.wip { display: flex; flex-direction: column; align-items: center; padding: 48px 0 64px; }
 .wip-hang { position: relative; width: 200px; height: 70px; }
 .wip-hang::before, .wip-hang::after { content: ""; position: absolute; top: 6px; width: 2px; height: 86px; background: var(--mute); transform-origin: top center; }
 .wip-hang::before { left: 50%; transform: rotate(52deg); }
@@ -336,8 +336,6 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
 .wip-en { font-size: 11px; letter-spacing: 4px; color: var(--d3); font-weight: 700; }
 .wip-sign strong { font-size: 30px; line-height: 1.2; letter-spacing: -.5px; }
 .wip-sub { font-size: 13px; color: #5B6170; }
-.wip-art { margin: 34px 0 0; width: min(100%, 560px); background: #FAFAFA; border-radius: 16px; padding: 0; overflow: hidden; }
-.wip-art img { display: block; width: 100%; height: auto; }
 @keyframes wip-swing { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(2deg); } }
 @media (prefers-reduced-motion: reduce) { .wip-sign { animation: none; } }
 @media (min-width: 900px) { .wip { padding-top: 80px; } .wip-sign { width: 360px; } .wip-sign strong { font-size: 36px; } }
