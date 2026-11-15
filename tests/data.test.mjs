@@ -28,10 +28,27 @@ test("routes use coordinates, not vague city names", () => {
 });
 test("day 3 team classes", () => {
   const d = DEFAULTS.schedule[2].items;
-  assert.ok(d.find(i => i.team === "A").desc.includes("1, 2, 3반"));
-  assert.ok(d.find(i => i.team === "B").desc.includes("4, 5, 6반"));
+  assert.ok(d.find(i => i.team === "A").desc.includes("10-1·2·3반"));
+  assert.ok(d.find(i => i.team === "B").desc.includes("10-4·5·6반"));
 });
 test("three learn places with four topics each", () => {
   assert.equal(DEFAULTS.learn.length, 3);
   for (const s of DEFAULTS.learn) assert.equal(s.topics.length, 4, s.name);
+});
+
+test("schedule follows the 2026-235 family letter", () => {
+  const [d1, d2, d3] = DEFAULTS.schedule;
+  const find = (d, t) => d.items.find(i => i.t === t);
+  assert.equal(find(d1, "05:30").e, "07:00");
+  assert.match(find(d1, "13:00").title, /통일궁/);
+  assert.match(find(d1, "18:00").desc, /Holiday Inn Resort Ho Tram/);
+  assert.equal(find(d2, "07:00").e, "08:30");
+  assert.match(find(d2, "08:30").desc, /땀탕 광장/);
+  assert.ok(d2.items.some(i => i.team === "A" && i.t === "10:30" && /선월드/.test(i.title)));
+  assert.ok(d2.items.some(i => i.team === "B" && i.t === "10:30" && /바이저우 성모 성지/.test(i.desc)));
+  assert.ok(d2.items.some(i => i.t === "19:00" && /장기자랑/.test(i.title)));
+  assert.ok(d3.items.some(i => i.team === "A" && i.t === "13:00" && i.e === "15:00"));
+  assert.equal(find(d3, "15:00").e, "17:00");
+  assert.match(find(d3, "15:00").desc, /햄버거/);
+  assert.match(d3.info, /박물관 1곳만/);
 });

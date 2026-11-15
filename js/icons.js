@@ -9,7 +9,8 @@ const P = {
   cam: '<path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="4"/>',
   edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/>',
   close: '<path d="M6 6l12 12M18 6L6 18"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>'
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>'
 };
 export const icon = (name, cls = "") =>
   `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[name] || ""}</svg>`;

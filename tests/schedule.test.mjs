@@ -11,6 +11,7 @@ test("tickets list", async () => {
   const txt = await tks.allInnerTexts();
   ["11.18", "11.19", "11.20"].forEach((d, i) => { assert.match(txt[i], new RegExp(d.replace(".", "\\."))); assert.match(txt[i], new RegExp(`DAY ${i + 1}`)); });
   assert.equal(await tks.nth(1).getAttribute("href"), "#/schedule/2");
+  assert.match(await page.locator("#view .sched-note").innerText(), /현지 교통 및 기상 상황에 따라 세부 일정은 일부 변경될 수 있습니다/);
   const a = await tks.first().boundingBox(), c = await tks.last().boundingBox();
   const mid = (a.y + c.y + c.height) / 2;
   assert.ok(Math.abs(mid - 844 / 2) <= 80, `tickets centre ${mid}`);
@@ -30,17 +31,18 @@ test("day 2 defaults to team A, deep link to B", async () => {
   assert.equal((await page.locator("#view .tabs2 a.on").innerText()).trim(), "A팀");
   assert.match(await page.locator("#view .dayhd").innerText(), /DAY 2[\s\S]*붕따우/);
   let t = (await page.locator("#view .tl").allInnerTexts()).join("\n");
-  assert.match(t, /썬월드 워터파크/); assert.doesNotMatch(t, /시내 투어/);
+  assert.match(t, /선월드 워터파크/); assert.doesNotMatch(t, /시내 투어/);
   await close();
   ({ page, close } = await openPage({ hash: "#/schedule/2/B" }));
   t = (await page.locator("#view .tl").allInnerTexts()).join("\n");
-  assert.match(t, /붕따우 시내 투어/); assert.doesNotMatch(t, /썬월드/);
+  assert.match(t, /붕따우 시내 투어/); assert.doesNotMatch(t, /선월드/);
   await close();
 });
 
 test("day 1 has no team tabs and both halves", async () => {
   const { page, close } = await openPage({ hash: "#/schedule/1" });
   assert.equal(await page.locator("#view .tabs2").count(), 0);
+  assert.match(await page.locator("#view .sched-note").innerText(), /변경될 수 있습니다/);
   const t = await page.locator("#view").innerText();
   assert.match(t, /오전/); assert.match(t, /오후/);
   await close();

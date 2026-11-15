@@ -142,7 +142,7 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
   .home .bub { position: absolute; top: 240px; right: 6%; margin: 0; }
   .bub p { max-width: 420px; font-size: 17px; }
   .home-edit { position: absolute; top: 200px; right: 6%; margin: 0; }
-  .home .dev { left: 40px; right: auto; text-align: left; bottom: 24px; font-size: 16px; }
+  .home .dev { left: 40px; right: auto; text-align: left; bottom: 28px; font-size: 22px; color: #fff; letter-spacing: .3px; }
 }
 
 /* ===== 일정 ===== */
@@ -325,6 +325,20 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
 /* ===== 쌤 소개 ===== */
 .intro { color: var(--mute); font-size: 14px; margin: 4px 0 0; }
 .tgrid { display: grid; gap: 12px; margin-top: 14px; }
+/* 준비 중 팻말 (학생 화면) */
+.wip { display: flex; flex-direction: column; align-items: center; padding: 48px 0 64px; }
+.wip-hang { position: relative; width: 200px; height: 70px; }
+.wip-hang::before, .wip-hang::after { content: ""; position: absolute; top: 6px; width: 2px; height: 86px; background: var(--mute); transform-origin: top center; }
+.wip-hang::before { left: 50%; transform: rotate(52deg); }
+.wip-hang::after { left: 50%; transform: rotate(-52deg); }
+.wip-hang i { position: absolute; left: 50%; top: 0; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--d3l); box-shadow: 0 0 0 3px var(--bg); z-index: 1; }
+.wip-sign { margin-top: -6px; width: min(300px, 86vw); background: var(--tx); color: var(--bg); border-radius: 12px; padding: 26px 20px 22px; text-align: center; display: flex; flex-direction: column; gap: 6px; box-shadow: inset 0 0 0 6px var(--tx), inset 0 0 0 8px var(--d3), 0 14px 30px rgba(0, 0, 0, .35); transform: rotate(-3deg); transform-origin: top center; animation: wip-swing 4s ease-in-out infinite; }
+.wip-en { font-size: 11px; letter-spacing: 4px; color: var(--d3); font-weight: 700; }
+.wip-sign strong { font-size: 30px; line-height: 1.2; letter-spacing: -.5px; }
+.wip-sub { font-size: 13px; color: #5B6170; }
+@keyframes wip-swing { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(2deg); } }
+@media (prefers-reduced-motion: reduce) { .wip-sign { animation: none; } }
+@media (min-width: 900px) { .wip { padding-top: 80px; } .wip-sign { width: 360px; } .wip-sign strong { font-size: 36px; } }
 .tc { border-radius: 14px; padding: 18px 20px; color: var(--ink); min-height: 120px; }
 .tc small { font-size: 12px; letter-spacing: 1px; }
 .tc h3 { font-size: 24px; margin: 4px 0 6px; }
@@ -349,3 +363,40 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
 #adminbar .switch::after { width: 20px; height: 20px; }
 #adminbar .switch[aria-checked="true"]::after { left: 21px; }
 body.editing .home .dev { bottom: 54px; }
+
+/* ===== 지원단 인스타그램 ===== */
+.ig { max-width: 420px; margin: 0 auto; text-align: center; padding-top: 6px; }
+.ig-card { background: #fff; border-radius: 18px; padding: 18px 18px 14px; margin: 12px auto 0; width: min(100%, 340px); }
+.ig-qr { display: block; width: 100%; height: auto; }
+.ig-id { display: block; margin-top: 8px; font-family: "A2Z"; font-size: 22px; color: var(--ink); text-decoration: none; }
+.ig-txt { color: var(--mute); font-size: 14px; margin: 16px 0 0; line-height: 1.7; }
+.ig-txt b { color: var(--tx); font-family: "A2Z"; font-size: 16px; font-weight: 700; }
+.ig-go { display: flex; align-items: center; justify-content: center; gap: 6px; width: min(100%, 340px); margin: 18px auto 0; padding: 15px; border-radius: 12px; background: var(--tx); color: var(--ink); font-family: "A2Z"; font-size: 17px; text-decoration: none; }
+
+/* ===== 방문자 통계 (선생님 + 노트북에서만) ===== */
+.stats-pill, .stats-panel { display: none !important; }
+@media (min-width: 900px) {
+  body.teacher .stats-pill { display: flex !important; position: absolute; left: 40px; bottom: 70px; align-items: center; gap: 8px; border: 0; border-radius: 99px; padding: 8px 18px 8px 12px; background: rgba(241, 240, 236, .9); color: var(--ink); font-family: "A2Z"; font-size: 15px; }
+  body.teacher .stats-panel:not([hidden]) { display: block !important; position: absolute; top: 150px; right: 4%; width: 500px; z-index: 32; background: #fff; color: var(--ink); border-radius: 18px; padding: 16px 18px 18px; box-shadow: 0 20px 50px rgba(0, 0, 0, .45); }
+  body.teacher .home .dev { bottom: auto; top: 440px; }
+}
+.st-close { position: absolute; top: 12px; right: 12px; border: 0; background: none; color: #888; padding: 4px; }
+.st-empty { color: var(--pmute); font-size: 14px; margin: 14px 0; }
+.st-csv { width: 100%; margin-top: 12px; border: 1.5px solid var(--ink); background: none; border-radius: 10px; padding: 10px; font-family: "A2Z"; font-size: 14px; color: var(--ink); }
+.sched-note { font-size: 12px; color: var(--mute); text-align: center; margin: 4px 18px 0; }
+.halves + .sched-note { text-align: left; margin: 8px 0 0; }
+.st-hm { border-collapse: separate; border-spacing: 2px; margin-top: 10px; width: 100%; table-layout: fixed; font-size: 10px; }
+.st-hm thead th { font-weight: 400; color: #999; text-align: center; height: 14px; }
+.st-hm tbody th { width: 52px; text-align: right; padding-right: 4px; font-weight: 400; color: #888; font-size: 10px; line-height: 1.2; white-space: nowrap; }
+.st-hm tbody th b { display: block; color: var(--ink); font-size: 11px; }
+.st-hm thead th:first-child { width: 52px; }
+.st-hm td { height: 24px; border-radius: 3px; text-align: center; color: var(--ink); font-size: 9.5px; padding: 0; }
+.st-hm td.dark { color: #fff; }
+.st-legend { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-top: 8px; font-size: 11px; color: #777; }
+.st-legend i { width: 16px; height: 10px; border-radius: 2px; display: inline-block; }
+.st-peak { margin-left: 8px; color: var(--ink); }
+.st-tabs { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 99px; overflow: hidden; }
+.st-tabs button { border: 0; background: none; padding: 6px 16px; font-family: "A2Z"; font-size: 14px; color: var(--ink); }
+.st-tabs button[aria-selected="true"] { background: var(--ink); color: #fff; }
+.st-big { font-family: "A2Z"; font-size: 46px; line-height: 1; margin: 14px 0 4px; }
+.st-sub { margin: 0 0 4px; font-size: 12px; color: var(--pmute); }

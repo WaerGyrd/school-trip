@@ -80,7 +80,7 @@ test("files carry a version so phones fetch the new design", () => {
   const v = (html.match(/css\/style\.css\?v=([\w.-]+)/) || [])[1];
   assert.ok(v, "css has ?v=");
   assert.ok(html.includes(`js/app.js?v=${v}`));
-  for (const f of ["js/app.js", "js/pages.js"]) {
+  for (const f of ["js/app.js", "js/pages.js", "js/stats.js"]) {
     const src = fs.readFileSync(`${ROOT}/${f}`, "utf8");
     for (const m of src.matchAll(/from "\.\/([\w-]+\.js)(\?v=[\w.-]+)?"/g)) assert.equal(m[2], `?v=${v}`, `${f} imports ${m[1]} without ?v=${v}`);
   }

@@ -11,7 +11,7 @@ test("menu opens with numbered contents", async () => {
   const navs = await page.$$eval("#drawer [data-nav]", as => as.map(a => a.dataset.nav));
   assert.deepEqual(navs, ["schedule", "route", "notice", "learn", "photo", "teachers"]);
   const labels = await page.$$eval("#drawer [data-nav]", as => as.map(a => a.innerText.replace(/\s+/g, "")));
-  assert.deepEqual(labels, ["01일정", "02이동경로", "03공지사항", "04배워가기", "05포토존", "0610학년부선생님들소개"]);
+  assert.deepEqual(labels, ["01일정", "02이동경로", "03공지사항", "04배워가기", "05지원단인스타그램", "0610학년부선생님들소개"]);
   await close();
 });
 

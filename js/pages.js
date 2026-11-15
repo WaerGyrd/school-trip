@@ -1,8 +1,9 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261110d";
-import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS } from "./data.js?v=20261110d";
-import * as S from "./store.js?v=20261110d";
-import { icon } from "./icons.js?v=20261110d";
-import { pickRound } from "./quiz.js?v=20261110d";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261115b";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261115b";
+import * as S from "./store.js?v=20261115b";
+import { icon } from "./icons.js?v=20261115b";
+import { pickRound } from "./quiz.js?v=20261115b";
+import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261115b";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -52,8 +53,7 @@ export function padletLink() {
   const v = (S.state.content.settings || {}).padlet;
   return v !== undefined ? v : DEFAULTS.settings.padlet;
 }
-// 선생님이 입력한 링크는 http(s) 주소일 때만 링크로 씀 (javascript: 같은 주소 차단)
-const safeUrl = u => /^https?:\/\//i.test(String(u || "").trim()) ? String(u).trim() : "";
+
 const settingsForSave = () => ({ ...S.settings(), padlet: padletLink() });
 
 /* ---------- 메인 ---------- */
@@ -71,7 +71,70 @@ export function pageHome(ctx) {
       <div class="bub"><img src="assets/logo.png" alt="" onerror="this.remove()"><p>${esc(CITY_INTRO)}</p></div>
       <div class="edit-switch" hidden><span>편집 모드</span><button class="switch" role="switch" aria-checked="false" aria-label="편집 모드" data-toggle-edit></button></div>
       <div class="dev">개발자: 10229 조수민, 10524 이동선</div>
+      <button class="stats-pill" data-act="statsOpen">${icon("user")}오늘 방문자 수 / 총 방문자 수</button>
+      <div class="stats-panel" hidden></div>
     </section>`;
+  let rows = [], tab = "today";
+  const panel = () => ctx.view.querySelector(".stats-panel");
+  const md = d => d.slice(5).replace("-", ".");
+  const draw = () => {
+    const today = vnNow().date;
+    const todayRow = rows.find(r => r.day === today);
+    const n = tab === "today" ? (todayRow ? todayRow.visitors : 0) : rows.reduce((a, r) => a + r.visitors, 0);
+    const sub = tab === "today" ? `${md(today)} 하루 동안 사이트를 연 사람 수`
+      : rows.length ? `${md(rows[0].day)} ~ ${md(rows[rows.length - 1].day)} · ${rows.length}일 동안 날마다 센 방문자 수의 합` : "";
+    const body = tab === "today"
+      ? (todayRow ? statsTable([todayRow]) : '<p class="st-empty">오늘은 아직 방문 기록이 없어요.</p>')
+      : (rows.length ? statsTable(rows) : '<p class="st-empty">아직 기록이 없어요.</p>');
+    panel().innerHTML = `
+      <button class="st-close" data-act="statsClose" aria-label="닫기">${icon("close")}</button>
+      <div class="st-tabs" role="tablist">
+        <button role="tab" aria-selected="${tab === "today"}" data-act="statsTab" data-tab="today">오늘 방문자 수</button>
+        <button role="tab" aria-selected="${tab === "total"}" data-act="statsTab" data-tab="total">총 방문자 수</button>
+      </div>
+      <div class="st-big">${n}명</div>
+      <p class="st-sub">${sub}</p>
+      ${body}
+      <button class="st-csv" data-act="statsCsv">엑셀로 저장 (.csv)</button>`;
+    panel().hidden = false;
+  };
+  bind(ctx, {
+    statsOpen: async () => {
+      panel().hidden = false;
+      panel().innerHTML = '<p class="st-empty">불러오는 중…</p>';
+      try {
+        rows = await loadStats();
+        draw();
+      } catch (e) { panel().innerHTML = '<button class="st-close" data-act="statsClose" aria-label="닫기">' + icon("close") + '</button><p class="st-empty">통계를 불러오지 못했어요. Firebase 보안 규칙을 확인해 주세요.</p>'; }
+    },
+    statsClose: () => { panel().hidden = true; },
+    statsTab: d => { tab = d.tab; draw(); },
+    statsCsv: () => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([toCsv(rows)], { type: "text/csv;charset=utf-8" }));
+      a.download = `kish-trip-visitors-${vnNow().date.replaceAll("-", "")}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+  });
+}
+
+// 날짜(줄) × 0~23시(칸) 표: 진할수록 많이 온 시간, 칸 안에 사람 수
+const HEAT = ["#FBE3E1", "#F6C1BD", "#EF958F", "#E86D66", "#D9443B"];
+function statsTable(rows) {
+  const max = Math.max(1, ...rows.flatMap(r => HOURS.map(h => Number(r.hours[h]) || 0)));
+  const shade = n => n ? HEAT[Math.min(4, Math.floor(n / max * 5 - 1e-9))] : "#F4F4F2";
+  let peak = null;
+  for (const r of rows) { const p = peakOf(r); if (p && (!peak || p.n > peak.n)) peak = { ...p, day: r.day }; }
+  const md = d => d.slice(5).replace("-", ".");
+  return `<table class="st-hm">
+    <thead><tr><th></th>${HOURS.map(h => `<th>${Number(h) % 3 === 0 ? Number(h) : ""}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(r => `<tr><th>${md(r.day)}<b>${r.visitors}명</b></th>${HOURS.map(h => {
+      const n = Number(r.hours[h]) || 0;
+      return `<td style="background:${shade(n)}" class="${n / max > 0.6 ? "dark" : ""}" title="${md(r.day)} ${Number(h)}시 ${n}명">${n || ""}</td>`;
+    }).join("")}</tr>`).join("")}</tbody>
+  </table>
+  <div class="st-legend">적음 ${HEAT.map(c => `<i style="background:${c}"></i>`).join("")} 많음${peak ? `<span class="st-peak">가장 붐빈 시간: ${rows.length > 1 ? md(peak.day) + " " : ""}${Number(peak.h)}시 ${peak.n}명</span>` : ""}</div>`;
 }
 
 /* ---------- 일정 ---------- */
@@ -125,6 +188,7 @@ function scheduleList(ctx, days) {
     <section class="sched-list">
       <p class="lead">${esc(tripRange(days))}</p>
       <div class="tks">${tks}</div>
+      <p class="sched-note">※ 현지 교통 및 기상 상황에 따라 세부 일정은 일부 변경될 수 있습니다.</p>
       ${resetBar("schedule")}
       <div class="dev">개발자: 10229 조수민, 10524 이동선</div>
     </section>`;
@@ -168,6 +232,7 @@ function scheduleDay(ctx, days, di) {
     ${hasTeams ? `<div class="tabs2">${["A", "B"].map(k => `<a class="${team === k ? "on" : ""}" href="#/schedule/${di}/${k}">${k}팀</a>`).join("")}${myc && myTeam ? `<span class="mute my">내 반(${myc}반) ${myTeam}팀</span>` : ""}</div>` : ""}
     ${teamCard}
     <div class="halves">${half("오전", am)}${half("오후", pm)}</div>
+    <p class="sched-note">※ 현지 교통 및 기상 상황에 따라 세부 일정은 일부 변경될 수 있습니다.</p>
     ${addBtn("addItem", "일정 추가")}
     ${resetBar("schedule")}`, {
     reset: d => doReset(d.id),
@@ -539,21 +604,18 @@ export function pageQuiz(ctx) {
   ctx.leave(S.watchScores(list => { scores = list; const el = $("#rank"); if (el) el.innerHTML = rankHtml(); }));
 }
 
-/* ---------- 포토존 (사진은 패들렛에) ---------- */
+/* ---------- 지원단 인스타그램 (예전 포토존) ---------- */
 export function pagePhoto(ctx) {
-  const link = safeUrl(padletLink());
   page(ctx, `
-    <div class="board"><div class="pol"><div class="ph">${icon("cam")}반별 사진은 패들렛에</div>
-      <p>반별로 주제에 맞는 사진을 올려주세요.<br>수학여행이 끝나고 베스트 포토상을 뽑아요.</p></div></div>
-    ${link ? `<a class="pbtn" href="${esc(link)}" target="_blank" rel="noopener">패들렛에서 사진 올리기 ${icon("out")}</a>` : '<span class="pbtn off">패들렛 링크 준비 중이에요</span>'}
-    ${ed() ? `<div class="row" style="justify-content:center;margin-top:12px">${pen("editPadlet")}</div>` : ""}`, {
-    editPadlet: () => openForm({
-      title: "패들렛 링크 수정",
-      fields: [{ k: "padlet", label: "패들렛 주소 (비우면 '준비 중'으로 보여요)", ph: "https://padlet.com/..." }],
-      values: { padlet: padletLink() },
-      onSave: v => save("settings", { ...settingsForSave(), padlet: v.padlet })
-    })
-  });
+    <section class="ig">
+      <p class="eyebrow">수학여행 지원단 인스타그램</p>
+      <div class="ig-card">
+        <img class="ig-qr" src="${INSTAGRAM.qr}" alt="인스타그램 ${INSTAGRAM.id} QR 코드">
+        <a class="ig-id" href="${INSTAGRAM.url}" target="_blank" rel="noopener">@${INSTAGRAM.id}</a>
+      </div>
+      <p class="ig-txt"><b>수학여행 일정과 이벤트가 여기서 공지됩니다.</b><br>QR을 찍거나 아래 버튼을 눌러 팔로우해 주세요.</p>
+      <a class="ig-go" href="${INSTAGRAM.url}" target="_blank" rel="noopener">인스타그램에서 보기 ${icon("out")}</a>
+    </section>`);
 }
 
 /* ---------- 쌤 소개 ---------- */
@@ -566,6 +628,18 @@ const T_FIELDS = [
 ];
 
 export function pageTeachers(ctx) {
+  if (!S.isTeacher()) {
+    page(ctx, `
+      <div class="wip">
+        <div class="wip-hang" aria-hidden="true"><i></i></div>
+        <div class="wip-sign" role="status">
+          <span class="wip-en">COMING SOON</span>
+          <strong>준비 중이에요</strong>
+          <span class="wip-sub">선생님들 소개는 곧 열릴 예정이에요</span>
+        </div>
+      </div>`);
+    return;
+  }
   const list = S.get("teachers");
   page(ctx, `
     <p class="intro">10학년부 선생님들이 파워퍼프걸로 변신했어요!</p>
