@@ -1,9 +1,9 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261115e";
-import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261115e";
-import * as S from "./store.js?v=20261115e";
-import { icon } from "./icons.js?v=20261115e";
-import { pickRound } from "./quiz.js?v=20261115e";
-import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261115e";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261115f";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261115f";
+import * as S from "./store.js?v=20261115f";
+import { icon } from "./icons.js?v=20261115f";
+import { pickRound } from "./quiz.js?v=20261115f";
+import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261115f";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -634,9 +634,10 @@ export function pageTeachers(ctx) {
         <div class="wip-hang" aria-hidden="true"><i></i></div>
         <div class="wip-sign" role="status">
           <span class="wip-en">COMING SOON</span>
-          <strong>준비 중이에요</strong>
-          <span class="wip-sub">선생님들 소개는 곧 열릴 예정이에요</span>
+          <strong>제작 중이에요</strong>
+          <span class="wip-sub">파워퍼프걸로 변신한 선생님들을 곧 만나요</span>
         </div>
+        <figure class="wip-art"><img src="assets/teachers-ppg.jpg" alt="파워퍼프걸 그림체로 그린 10학년부 선생님 7명" width="1200" height="675"></figure>
       </div>`);
     return;
   }
