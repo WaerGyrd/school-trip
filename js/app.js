@@ -1,7 +1,7 @@
-import { $, $$, esc, ls, toast, beep } from "./util.js?v=20261115e";
-import * as S from "./store.js?v=20261115e";
-import * as P from "./pages.js?v=20261115e";
-import { recordVisit } from "./stats.js?v=20261115e";
+import { $, $$, esc, ls, toast, beep } from "./util.js?v=20261115f";
+import * as S from "./store.js?v=20261115f";
+import * as P from "./pages.js?v=20261115f";
+import { recordVisit } from "./stats.js?v=20261115f";
 
 const PAGES = {
   home: P.pageHome, schedule: P.pageSchedule, route: P.pageRoute, notice: P.pageNotice,
