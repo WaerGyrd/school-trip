@@ -1,9 +1,9 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261115b";
-import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261115b";
-import * as S from "./store.js?v=20261115b";
-import { icon } from "./icons.js?v=20261115b";
-import { pickRound } from "./quiz.js?v=20261115b";
-import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261115b";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261115c";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261115c";
+import * as S from "./store.js?v=20261115c";
+import { icon } from "./icons.js?v=20261115c";
+import { pickRound } from "./quiz.js?v=20261115c";
+import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261115c";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
