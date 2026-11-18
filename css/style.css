@@ -332,25 +332,17 @@ body.menu-open #scrim { opacity: 1; pointer-events: auto; }
 .tc-art { position: absolute; left: 0; bottom: 0; width: 46%; height: 72%; }
 .tc-beam { position: absolute; left: 34%; top: 18%; width: 42%; height: 120%; background: var(--b); transform: skewX(24deg); }
 .tc-art img { position: absolute; left: 10%; bottom: 4px; max-width: 86%; max-height: 100%; width: auto; height: auto; }
-.tc-traits { grid-column: 2; align-self: center; list-style: none; margin: 4px 0 30px; padding: 0; position: relative; z-index: 2; }
+.tc-traits { grid-column: 2; align-self: center; list-style: none; margin: 4px 0 8px; padding: 0; position: relative; z-index: 2; }
 .tc-traits li { font-family: "A2Z", sans-serif; font-size: 17px; line-height: 1.35; margin: 3px 0; padding-left: 14px; text-indent: -14px; word-break: keep-all; }
 .tc-traits li::before { content: "-"; display: inline-block; width: 14px; text-indent: 0; }
 .tc-traits .nw { white-space: nowrap; }
 .tc-traits .hrt { width: .95em; height: .95em; vertical-align: -.1em; fill: #E5484D; }
-.tc-like { position: absolute; right: 14px; bottom: 12px; z-index: 3; display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 99px; padding: 6px 12px 6px 10px; background: rgba(255, 255, 255, .72); color: #111; font-family: "Free"; font-size: 15px; cursor: pointer; }
-.tc-like .hrt { width: 18px; height: 18px; fill: none; stroke: #111; stroke-width: 2; }
-.tc-like.on .hrt { fill: #E5484D; stroke: #E5484D; }
-.tc-like.on { background: #fff; }
-.tc-like:active { transform: scale(.94); }
-.tc-like b { font-weight: 700; min-width: 1ch; }
 @media (min-width: 900px) {
   .tcards { grid-template-columns: 1fr 1fr; gap: 22px; }
   .tcard { min-height: 300px; padding: 26px 30px; border-radius: 30px; }
   .tcard h3 { font-size: 52px; }
   .tc-traits li { font-size: 24px; }
-  .tc-like { right: 22px; bottom: 20px; font-size: 17px; padding: 8px 16px 8px 13px; }
-  .tc-like .hrt { width: 21px; height: 21px; }
-}
+    }
 .tc { border-radius: 14px; padding: 18px 20px; color: var(--ink); min-height: 120px; }
 .tc small { font-size: 12px; letter-spacing: 1px; }
 .tc h3 { font-size: 24px; margin: 4px 0 6px; }

@@ -173,5 +173,5 @@ export const TEACHER_CARDS = [
   { id: "lee-suseon", name: "이수선", c: "#F4A2D4", b: "#F9C9E6", traits: ["뛰어난 스토리텔러", "변함없는 T"] },
   { id: "lee-jaei", name: "이재이", c: "#FFA9BE", b: "#FFCDD9", traits: ["강한 목청의 소유자", "자유로운 영혼 (여행자)"] },
   { id: "han-hyun", name: "한현", c: "#C3A2F3", b: "#DCC8FA", traits: ["MZ", "춤신춤왕"] },
-  { id: "kim-younghoon", name: "김영훈", c: "#A9B2F6", b: "#CDD2FB", traits: ["별명 쿼니후니 (이유 모름)", "릴스 챌린저"] },
+  { id: "kim-younghoon", name: "김영훈", c: "#A9B2F6", b: "#CDD2FB", traits: ["별명 풔니후니", "릴스 챌린저"] },
 ];

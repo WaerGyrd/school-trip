@@ -11,7 +11,9 @@ test("students see all 7 teacher cards in order, with picture and traits", async
   assert.equal(await cards.count(), 7);
   assert.deepEqual(await cards.locator("h3").allInnerTexts(), ORDER);
   assert.match(await cards.nth(0).innerText(), /워커홀릭[\s\S]*한국사 원탑/);
-  assert.match(await cards.nth(6).innerText(), /릴스 챌린저/);
+  assert.match(await cards.nth(6).innerText(), /별명 풔니후니[\s\S]*릴스 챌린저/);
+  assert.doesNotMatch(await cards.nth(6).innerText(), /이유 모름/);
+  assert.equal(await page.locator("#view .tc-like").count(), 0, "no like buttons");
   const imgs = await page.locator("#view .tcard img").evaluateAll(a => a.map(i => i.complete && i.naturalWidth > 0));
   assert.deepEqual(imgs, Array(7).fill(true), "all characters load");
   const bgs = await cards.evaluateAll(a => a.map(c => getComputedStyle(c).backgroundColor));
@@ -22,22 +24,6 @@ test("students see all 7 teacher cards in order, with picture and traits", async
   await close();
 });
 
-test("like counts come from Firestore and a tap adds exactly one", async () => {
-  const { page, close } = await openPage({ hash: "#/teachers", fake: { likes: { "bae-ilhwan": 12 } } });
-  const btn = page.locator('.tcard:nth-child(2) .tc-like');
-  assert.equal((await btn.innerText()).trim(), "12");
-  await btn.click();
-  await page.waitForTimeout(200);
-  assert.equal((await btn.innerText()).trim(), "13");
-  assert.equal(await btn.getAttribute("aria-pressed"), "true");
-  let w = await page.evaluate(() => window.__WRITES.filter(x => x.path.startsWith("likes/")));
-  assert.deepEqual(w, [{ op: "set", path: "likes/bae-ilhwan", data: { count: { __inc: 1 } } }]);
-  await btn.click(); await page.waitForTimeout(200);
-  w = await page.evaluate(() => window.__WRITES.filter(x => x.path.startsWith("likes/")));
-  assert.equal(w.length, 1, "one like per phone");
-  assert.equal((await btn.innerText()).trim(), "13");
-  await close();
-});
 
 test("PC shows the cards two per row", async () => {
   const { page, close } = await openPage({ hash: "#/teachers", width: 1440, height: 900 });

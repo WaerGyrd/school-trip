@@ -1,10 +1,9 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261118a";
-import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM, TEACHER_CARDS } from "./data.js?v=20261118a";
-import * as S from "./store.js?v=20261118a";
-import { icon } from "./icons.js?v=20261118a";
-import { pickRound } from "./quiz.js?v=20261118a";
-import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261118a";
-import { watchLikes, addLike, countOf, liked } from "./likes.js?v=20261118a";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261118b";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM, TEACHER_CARDS } from "./data.js?v=20261118b";
+import * as S from "./store.js?v=20261118b";
+import { icon } from "./icons.js?v=20261118b";
+import { pickRound } from "./quiz.js?v=20261118b";
+import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261118b";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -622,31 +621,13 @@ export function pagePhoto(ctx) {
 /* ---------- 쌤 소개 ---------- */
 
 const HEART = '<svg class="hrt" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7.1 4.5c2 0 3.6 1.1 4.9 2.8 1.3-1.7 2.9-2.8 4.9-2.8 3.5 0 5.7 3.4 4.4 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>';
-function likeBtn(t) {
-  const on = liked(t.id);
-  return `<button class="tc-like${on ? " on" : ""}" data-act="like" data-id="${t.id}" aria-pressed="${on}" aria-label="${esc(t.name)} 선생님 좋아요">${HEART}<b>${countOf(t.id)}</b></button>`;
-}
 export function pageTeachers(ctx) {
   page(ctx, `
-    <p class="intro">10학년부 선생님들이 파워퍼프걸로 변신했어요! 마음에 드는 선생님께 좋아요를 눌러 주세요.</p>
+    <p class="intro">10학년부 선생님들이 파워퍼프걸로 변신했어요!</p>
     <div class="tcards">${TEACHER_CARDS.map(t => `
       <article class="tcard" style="--c:${t.c};--b:${t.b}">
         <h3>${esc(t.name)}</h3>
         <div class="tc-art" aria-hidden="true"><span class="tc-beam"></span><img src="assets/teachers/${t.id}.png" alt="" loading="lazy"></div>
         <ul class="tc-traits">${t.traits.map(x => `<li>${esc(x).replace("{heart}", HEART).replace(/\(([^)]*)\)/g, '<span class="nw">($1)</span>')}</li>`).join("")}</ul>
-        ${likeBtn(t)}
-      </article>`).join("")}</div>`, {
-    like: async d => {
-      if (liked(d.id)) return toast("이미 좋아요를 눌렀어요", 1800);
-      if (!(await addLike(d.id))) toast("지금은 좋아요를 저장하지 못했어요. 잠시 후 다시 눌러 주세요.");
-    }
-  });
-  watchLikes(() => {
-    ctx.view.querySelectorAll(".tc-like").forEach(b => {
-      const id = b.dataset.id, on = liked(id);
-      b.querySelector("b").textContent = countOf(id);
-      b.classList.toggle("on", on);
-      b.setAttribute("aria-pressed", String(on));
-    });
-  });
+      </article>`).join("")}</div>`);
 }
