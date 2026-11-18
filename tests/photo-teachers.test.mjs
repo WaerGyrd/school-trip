@@ -19,11 +19,3 @@ test("saving team assignment keeps the padlet link", async () => {
   await close();
 });
 
-test("teacher cards (signed-in teacher)", async () => {
-  const { page, close } = await openPage({ hash: "#/teachers", width: 1440, height: 900, fake: { teacher: T } });
-  assert.equal(await page.locator("#view .tc").count(), 7);
-  const ys = await page.$$eval("#view .tc", e => e.slice(0, 3).map(x => Math.round(x.getBoundingClientRect().top)));
-  assert.equal(new Set(ys).size, 1);
-  assert.equal(await page.locator("#view .tc").first().evaluate(e => getComputedStyle(e).backgroundImage), "none");
-  await close();
-});

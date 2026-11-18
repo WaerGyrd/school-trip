@@ -1,9 +1,10 @@
-import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261115g";
-import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM } from "./data.js?v=20261115g";
-import * as S from "./store.js?v=20261115g";
-import { icon } from "./icons.js?v=20261115g";
-import { pickRound } from "./quiz.js?v=20261115g";
-import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261115g";
+import { $, esc, ls, toast, vnNow, fmtNoticeTime, openForm } from "./util.js?v=20261118a";
+import { DEFAULTS, CITY_INTRO, NOTICE_AUTHORS, INSTAGRAM, TEACHER_CARDS } from "./data.js?v=20261118a";
+import * as S from "./store.js?v=20261118a";
+import { icon } from "./icons.js?v=20261118a";
+import { pickRound } from "./quiz.js?v=20261118a";
+import { loadStats, toCsv, HOURS, peakOf } from "./stats.js?v=20261118a";
+import { watchLikes, addLike, countOf, liked } from "./likes.js?v=20261118a";
 
 const clone = o => JSON.parse(JSON.stringify(o));
 const ed = () => S.isEditing();
@@ -619,46 +620,33 @@ export function pagePhoto(ctx) {
 }
 
 /* ---------- 쌤 소개 ---------- */
-const T_FIELDS = [
-  { k: "name", label: "이름", req: true },
-  { k: "role", label: "담당 (예: 1반 담임)" },
-  { k: "subject", label: "담당 과목 (예: 수학)" },
-  { k: "nick", label: "파워퍼프걸 별명 (예: 블로섬 쌤)" },
-  { k: "intro", label: "소개", type: "textarea", rows: 5 }
-];
 
+const HEART = '<svg class="hrt" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7.1 4.5c2 0 3.6 1.1 4.9 2.8 1.3-1.7 2.9-2.8 4.9-2.8 3.5 0 5.7 3.4 4.4 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>';
+function likeBtn(t) {
+  const on = liked(t.id);
+  return `<button class="tc-like${on ? " on" : ""}" data-act="like" data-id="${t.id}" aria-pressed="${on}" aria-label="${esc(t.name)} 선생님 좋아요">${HEART}<b>${countOf(t.id)}</b></button>`;
+}
 export function pageTeachers(ctx) {
-  if (!S.isTeacher()) {
-    page(ctx, `
-      <div class="wip">
-        <div class="wip-hang" aria-hidden="true"><i></i></div>
-        <div class="wip-sign" role="status">
-          <span class="wip-en">COMING SOON</span>
-          <strong>제작 중이에요</strong>
-          <span class="wip-sub">선생님들 소개는 곧 열릴 예정이에요</span>
-        </div>
-      </div>`);
-    return;
-  }
-  const list = S.get("teachers");
   page(ctx, `
-    <p class="intro">10학년부 선생님들이 파워퍼프걸로 변신했어요!</p>
-    <div class="tgrid">${list.map((t, i) => `
-      <div class="tc t${i % 3}">
-        ${t.role || t.subject ? `<small>${esc([t.role, t.subject].filter(Boolean).join(" · "))}</small>` : ""}
+    <p class="intro">10학년부 선생님들이 파워퍼프걸로 변신했어요! 마음에 드는 선생님께 좋아요를 눌러 주세요.</p>
+    <div class="tcards">${TEACHER_CARDS.map(t => `
+      <article class="tcard" style="--c:${t.c};--b:${t.b}">
         <h3>${esc(t.name)}</h3>
-        ${t.nick ? `<div class="nick">${esc(t.nick)}</div>` : ""}
-        <p>${t.intro ? esc(t.intro) : "소개를 준비 중이에요"}</p>
-        ${pen("editT", `data-i="${i}"`)}
-      </div>`).join("")}</div>
-    ${addBtn("addT", "선생님 추가")}
-    ${resetBar("teachers")}`, {
-    reset: d => doReset(d.id),
-    editT: d => openForm({
-      title: "선생님 소개 수정", fields: T_FIELDS, values: list[d.i],
-      onSave: v => mut("teachers", a => { a[d.i] = v; }),
-      onDelete: () => mut("teachers", a => { a.splice(d.i, 1); })
-    }),
-    addT: () => openForm({ title: "선생님 추가", fields: T_FIELDS, onSave: v => mut("teachers", a => { a.push(v); }) })
+        <div class="tc-art" aria-hidden="true"><span class="tc-beam"></span><img src="assets/teachers/${t.id}.png" alt="" loading="lazy"></div>
+        <ul class="tc-traits">${t.traits.map(x => `<li>${esc(x).replace("{heart}", HEART).replace(/\(([^)]*)\)/g, '<span class="nw">($1)</span>')}</li>`).join("")}</ul>
+        ${likeBtn(t)}
+      </article>`).join("")}</div>`, {
+    like: async d => {
+      if (liked(d.id)) return toast("이미 좋아요를 눌렀어요", 1800);
+      if (!(await addLike(d.id))) toast("지금은 좋아요를 저장하지 못했어요. 잠시 후 다시 눌러 주세요.");
+    }
+  });
+  watchLikes(() => {
+    ctx.view.querySelectorAll(".tc-like").forEach(b => {
+      const id = b.dataset.id, on = liked(id);
+      b.querySelector("b").textContent = countOf(id);
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-pressed", String(on));
+    });
   });
 }

@@ -164,3 +164,14 @@ export const DEFAULTS = {
     padlet: "https://padlet.com/xumm1n3/2026-kish-s025bxzekoi8mpfapohx"
   }
 };
+
+// 10학년부 선생님들 소개 카드 (그림 왼쪽 위부터 순서대로). {heart} 는 하트 아이콘으로 바뀐다.
+export const TEACHER_CARDS = [
+  { id: "kim-younghan", name: "김영한", c: "#86C3FD", b: "#B3DAFF", traits: ["워커홀릭", "한국사 원탑"] },
+  { id: "bae-ilhwan", name: "배일환", c: "#FBD978", b: "#FDE8A8", traits: ["리치 러버", "투머치토커"] },
+  { id: "cho-jiyong", name: "조지용", c: "#9DDB9A", b: "#C5ECC2", traits: ["지피티 {heart} 조지용쌤", "베이시스트", "개발자"] },
+  { id: "lee-suseon", name: "이수선", c: "#F4A2D4", b: "#F9C9E6", traits: ["뛰어난 스토리텔러", "변함없는 T"] },
+  { id: "lee-jaei", name: "이재이", c: "#FFA9BE", b: "#FFCDD9", traits: ["강한 목청의 소유자", "자유로운 영혼 (여행자)"] },
+  { id: "han-hyun", name: "한현", c: "#C3A2F3", b: "#DCC8FA", traits: ["MZ", "춤신춤왕"] },
+  { id: "kim-younghoon", name: "김영훈", c: "#A9B2F6", b: "#CDD2FB", traits: ["별명 쿼니후니 (이유 모름)", "릴스 챌린저"] },
+];
