@@ -20,6 +20,7 @@ function listOf(path) {
   if (path === "announcements") return f.notices || [];
   if (path === "scores") return f.scores || [];
   if (path === "photos") return f.photos || [];
+  if (path === "likes") return Object.entries(f.likes || {}).map(([id, count]) => ({ id, count }));
   return [];
 }
 const docSnap = d => ({ id: d.id, data: () => ({ ...d, createdAt: d.createdAt ? ts(d.createdAt) : undefined }), metadata: { hasPendingWrites: false } });
